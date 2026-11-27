@@ -8,6 +8,7 @@ appId: com.entrenos.amigosecreto
     visible:
       id: dev-login-name
     timeout: 40000
+- takeScreenshot: shots/${THEME}-00-welcome
 - tapOn:
     id: dev-login-name
 - inputText: ${NAME}
