@@ -16,7 +16,10 @@ interface StoredSession {
   accessTokenExpiresAt: string;
   refreshToken: string;
   user: Me;
+  method?: LoginMethod;
 }
+
+export type LoginMethod = 'google' | 'dev';
 
 export type SessionStatus = 'loading' | 'signedOut' | 'signedIn';
 
@@ -26,10 +29,11 @@ interface SessionState {
   accessToken: string | null;
   accessTokenExpiresAt: number;
   refreshToken: string | null;
+  method: LoginMethod;
   /** Set when the session ended on its own (refresh failed) to show a toast. */
   expiredNotice: boolean;
   hydrate: () => Promise<void>;
-  setSession: (session: Session) => Promise<void>;
+  setSession: (session: Session, method?: LoginMethod) => Promise<void>;
   setUser: (user: Me) => Promise<void>;
   clear: (opts?: { expired?: boolean }) => Promise<void>;
   ackExpiredNotice: () => void;
@@ -58,6 +62,7 @@ export const useSession = create<SessionState>((set, get) => ({
   accessToken: null,
   accessTokenExpiresAt: 0,
   refreshToken: null,
+  method: 'google',
   expiredNotice: false,
 
   hydrate: async () => {
@@ -71,6 +76,7 @@ export const useSession = create<SessionState>((set, get) => ({
           accessToken: parsed.accessToken,
           accessTokenExpiresAt: Date.parse(parsed.accessTokenExpiresAt),
           refreshToken: parsed.refreshToken,
+          method: parsed.method ?? 'google',
         });
         return;
       }
@@ -80,12 +86,14 @@ export const useSession = create<SessionState>((set, get) => ({
     set({ status: 'signedOut' });
   },
 
-  setSession: async (session) => {
+  setSession: async (session, method) => {
+    const m = method ?? get().method;
     await persist({
       accessToken: session.accessToken,
       accessTokenExpiresAt: session.accessTokenExpiresAt,
       refreshToken: session.refreshToken,
       user: session.user,
+      method: m,
     });
     set({
       status: 'signedIn',
@@ -93,6 +101,7 @@ export const useSession = create<SessionState>((set, get) => ({
       accessToken: session.accessToken,
       accessTokenExpiresAt: Date.parse(session.accessTokenExpiresAt),
       refreshToken: session.refreshToken,
+      method: m,
       expiredNotice: false,
     });
   },
@@ -106,6 +115,7 @@ export const useSession = create<SessionState>((set, get) => ({
         accessTokenExpiresAt: new Date(s.accessTokenExpiresAt).toISOString(),
         refreshToken: s.refreshToken,
         user,
+        method: s.method,
       });
     }
   },

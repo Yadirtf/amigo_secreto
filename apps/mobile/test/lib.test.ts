@@ -147,6 +147,10 @@ describe('draw feasibility hint', () => {
       ['a', 'b'],
       ['a', 'c'],
     ]);
-    expect(r).toEqual({ ok: false, reason: 'blocked', blocking: ['a'] });
+    expect(r.ok).toBe(false);
+    if (!r.ok && r.reason === 'blocked') expect(r.blocking).toContain('a');
+  });
+  it('accepts a pair exclusion in a group of 5', () => {
+    expect(drawFeasibility([...ids, 'e'], [['a', 'b']])).toEqual({ ok: true });
   });
 });

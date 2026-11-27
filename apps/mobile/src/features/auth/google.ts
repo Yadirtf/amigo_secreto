@@ -51,3 +51,20 @@ export async function googleSignOut(): Promise<void> {
     // not signed in with Google (dev login) or module unavailable
   }
 }
+
+/** A fresh ID token for sensitive operations (account deletion). */
+export async function googleFreshIdToken(): Promise<GoogleResult> {
+  try {
+    ensureConfigured();
+    if (GoogleSignin.hasPreviousSignIn()) {
+      const silent = await GoogleSignin.signInSilently();
+      if (silent.type === 'success') {
+        const { idToken } = await GoogleSignin.getTokens();
+        if (idToken) return { kind: 'ok', idToken };
+      }
+    }
+  } catch {
+    // fall back to the interactive flow
+  }
+  return googleSignIn();
+}

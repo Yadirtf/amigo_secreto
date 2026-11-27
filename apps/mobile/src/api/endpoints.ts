@@ -47,14 +47,19 @@ export function createEndpoints(client: ApiClient) {
           body: { refreshToken },
           auth: false,
         }),
-      logout: (refreshToken: string) =>
-        client.request('POST', '/v1/auth/logout', { schema: Ok, body: { refreshToken } }),
+      logout: (refreshToken: string, pushToken?: string) =>
+        client.request('POST', '/v1/auth/logout', {
+          schema: Ok,
+          body: pushToken ? { refreshToken, pushToken } : { refreshToken },
+        }),
     },
     me: {
       get: (signal?: AbortSignal) => client.request('GET', '/v1/me', { schema: Me, signal }),
       update: (body: { name?: string; photo?: string | null }) =>
         client.request('PATCH', '/v1/me', { schema: Me, body }),
-      delete: () => client.request('DELETE', '/v1/me', { schema: Ok }),
+      /** Requires a FRESH Google ID token (dev-login users on staging send {}). */
+      delete: (idToken: string | null) =>
+        client.request('DELETE', '/v1/me', { schema: Ok, body: idToken ? { idToken } : {} }),
       pushToken: (token: string) =>
         client.request('PUT', '/v1/me/push-token', { schema: Ok, body: { token } }),
     },

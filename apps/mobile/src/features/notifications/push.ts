@@ -51,6 +51,16 @@ function projectId(): string | undefined {
   return extra?.eas?.projectId ?? Constants.easConfig?.projectId ?? undefined;
 }
 
+/** The device's Expo push token when permission is granted (for logout). */
+export async function currentPushToken(): Promise<string | undefined> {
+  try {
+    if (!Device.isDevice || !(await Notifications.getPermissionsAsync()).granted) return undefined;
+    return (await Notifications.getExpoPushTokenAsync({ projectId: projectId() })).data;
+  } catch {
+    return undefined;
+  }
+}
+
 async function sendToken(): Promise<boolean> {
   if (!Device.isDevice) return false;
   try {
