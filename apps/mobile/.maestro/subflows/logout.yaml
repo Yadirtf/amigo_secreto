@@ -1,5 +1,13 @@
 appId: com.entrenos.amigosecreto
 ---
+# Works from any screen: go back to the groups list first.
+- repeat:
+    times: 4
+    while:
+      notVisible:
+        id: profile-button
+    commands:
+      - back
 - tapOn:
     id: profile-button
 - scrollUntilVisible:
