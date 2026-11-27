@@ -20,15 +20,15 @@
 
 - App móvil Expo (`apps/mobile`) y sistema de diseño (`packages/ui`): todas las pantallas v1, deep links `/i/<código>`, push, caché offline (7 días), UI optimista, bloqueo de capturas en pantallas secretas. 108 tests de app + UI. Bundle Android de 5,5 MB.
 - Workflow e2e Android con Maestro en emulador (API local + MongoDB) y APK de prueba que se genera tras cada despliegue a staging.
+- Material de tiendas en `docs/tienda/` (ficha de Play, seguridad de datos, clasificación de contenido) y política de privacidad publicada por la API en `/privacidad`.
 
 ## En curso
 - Primera corrida de los e2e en CI y revisión UX pantalla por pantalla.
 
 ## Falta
-- App móvil, push, deep links, caché offline.
-- Endurecimiento: red team, e2e Maestro, red lenta, revisión UX.
-- Material de tiendas, política de privacidad, `docs/DEPLOY.md`.
+- Pruebas de red lenta / sin conexión y medición de consumo de datos.
+- Capturas de tienda (salen de la revisión UX).
 
 ## Bloqueado / espera al dueño
-- Secretos en GitHub para el spike y los despliegues: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `MONGODB_URI_STAGING`, `MONGODB_URI_PRODUCTION`.
+- Secretos en GitHub para el spike y los despliegues: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `MONGODB_URI_STAGING`, `MONGODB_URI_PRODUCTION`. Opcional: `CONTACT_EMAIL` (correo público en la política de privacidad).
 - 12 testers para la prueba cerrada de Google Play.
