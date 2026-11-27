@@ -38,7 +38,6 @@ export interface MemberView extends PublicProfile {
   participates: boolean;
   isOrganizer: boolean;
   isMe: boolean;
-  hasSeenAssignment: boolean;
 }
 
 export interface GroupDetailView extends GroupSummaryView {
@@ -52,7 +51,7 @@ export interface GroupDetailView extends GroupSummaryView {
   drawnAt: string | null;
   revealedAt: string | null;
   canDraw: boolean;
-  memberLimit: number | null;
+  memberLimit: number;
   redrawsLeft: number;
 }
 
@@ -91,7 +90,6 @@ export async function toDetail(
       participates: m.participates,
       isOrganizer: m.userId === group.organizerId,
       isMe: m.userId === actorId,
-      hasSeenAssignment: m.hasSeenAssignment,
     })),
     exclusions: group.exclusions,
     drawCount: group.drawCount,
@@ -138,6 +136,7 @@ export async function createGroup(
       },
     ],
     exclusions: [],
+    bannedUserIds: [],
     drawCount: 0,
     drawnAt: null,
     revealedAt: null,
@@ -272,6 +271,10 @@ export async function joinGroup(
     if (group.members.some((m) => m.userId === actorId)) {
       return toDetail(deps, group, actorId);
     }
+    // Someone the organizer removed can't come back with the same link (PT-03).
+    if ((group.bannedUserIds ?? []).includes(actorId)) {
+      throw new DomainError('INVITE_INVALID', 'invite code invalid or expired');
+    }
     requireStatus(group, 'open');
     const limit = memberLimit(group, deps);
     if (limit !== null && group.members.length >= limit) {
@@ -320,7 +323,7 @@ export async function rotateInvite(
  * open: after the draw the organizer must reopen (which clears the draw).
  */
 export async function removeMember(
-  deps: Pick<Deps, 'groups' | 'wishlists'>,
+  deps: Pick<Deps, 'groups' | 'wishlists' | 'ids' | 'clock' | 'policy'>,
   actorId: UserId,
   groupId: GroupId,
   targetId: UserId,
@@ -337,6 +340,14 @@ export async function removeMember(
     }
     g.members = g.members.filter((m) => m.userId !== targetId);
     g.exclusions = g.exclusions.filter(([a, b]) => a !== targetId && b !== targetId);
+    if (!self) {
+      // Removed by the organizer: ban and rotate the invite code (PT-03).
+      g.bannedUserIds = [...new Set([...(g.bannedUserIds ?? []), targetId])];
+      g.inviteCode = deps.ids.inviteCode();
+      g.inviteExpiresAt = new Date(
+        deps.clock.now().getTime() + deps.policy.inviteTtlDays * 86_400_000,
+      );
+    }
     return g;
   });
   await deps.wishlists.deleteForUser(groupId, targetId);
@@ -374,6 +385,7 @@ export async function setExclusions(
     requireStatus(g, 'open');
     const ids = new Set(g.members.map((m) => m.userId));
     const seen = new Set<string>();
+    const perPerson = new Map<string, number>();
     const clean: Exclusion[] = [];
     for (const [a, b] of exclusions) {
       if (a === b || !ids.has(a) || !ids.has(b)) {
@@ -383,6 +395,16 @@ export async function setExclusions(
       const key = pair.join('|');
       if (seen.has(key)) continue;
       seen.add(key);
+      for (const p of pair) {
+        const n = (perPerson.get(p) ?? 0) + 1;
+        if (n > LIMITS.exclusionsPerPerson) {
+          throw new DomainError('INVALID_INPUT', 'too many exclusions for one person', {
+            field: 'exclusions',
+            max: LIMITS.exclusionsPerPerson,
+          });
+        }
+        perPerson.set(p, n);
+      }
       clean.push(pair);
     }
     g.exclusions = clean;

@@ -4,6 +4,7 @@ import {
   allowedRecipients,
   draw,
   isValidDraw,
+  realOptions,
   shuffle,
   type Exclusion,
   type RandomSource,
@@ -153,6 +154,73 @@ describe('draw (property-based)', () => {
   it('ignores exclusions about people outside the draw', () => {
     const r = draw(['a', 'b', 'c'], [['a', 'zz']], seededRandom(3));
     expect(r.ok).toBe(true);
+  });
+});
+
+describe('realOptions', () => {
+  it('counts only pairs that occur in some valid draw', () => {
+    const people = ids(6);
+    const [o, t, a, b] = people as [string, string, string, string];
+    const r = realOptions(people, [
+      [o, a],
+      [o, b],
+      [t, a],
+      [t, b],
+      [a, b],
+    ]);
+    expect(r.feasible).toBe(true);
+    expect(r.asGiver.get(o)).toBe(1); // O can only ever give to T
+    expect(r.asReceiver.get(o)).toBe(1); // and only T can give to O
+    expect(r.asGiver.get('u4')).toBeGreaterThanOrEqual(2);
+  });
+  it('matches brute force on random small groups', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 3, max: 7 }).chain((n) =>
+          fc.record({
+            people: fc.constant(ids(n)),
+            exclusions: fc.array(
+              fc
+                .tuple(fc.integer({ min: 0, max: n - 1 }), fc.integer({ min: 0, max: n - 1 }))
+                .map(([x, y]) => [`u${x}`, `u${y}`] as Exclusion),
+              { maxLength: n * 2 },
+            ),
+          }),
+        ),
+        ({ people, exclusions }) => {
+          const r = realOptions(people, exclusions);
+          // Brute force: enumerate all valid draws.
+          const allowed = allowedRecipients(people, exclusions);
+          const seen = new Set<string>();
+          const used = new Set<string>();
+          const cur: string[] = [];
+          const go = (i: number) => {
+            if (i === people.length) {
+              cur.forEach((rcv, j) => seen.add(`${people[j]}>${rcv}`));
+              return;
+            }
+            for (const rcv of allowed.get(people[i] as string) ?? []) {
+              if (used.has(rcv)) continue;
+              used.add(rcv);
+              cur.push(rcv);
+              go(i + 1);
+              cur.pop();
+              used.delete(rcv);
+            }
+          };
+          go(0);
+          expect(r.feasible).toBe(seen.size > 0);
+          if (!r.feasible) return;
+          for (const p of people) {
+            const giverCount = [...seen].filter((k) => k.startsWith(`${p}>`)).length;
+            const receiverCount = [...seen].filter((k) => k.endsWith(`>${p}`)).length;
+            expect(r.asGiver.get(p)).toBe(giverCount);
+            expect(r.asReceiver.get(p)).toBe(receiverCount);
+          }
+        },
+      ),
+      { numRuns: 1500 },
+    );
   });
 });
 

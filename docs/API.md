@@ -25,10 +25,10 @@ Siempre `{ "error": { "code", "message", "details?" } }` (`ApiError`). `message`
 | POST | `/v1/auth/google` | no | `GoogleSignInRequest` | `Session` |
 | POST | `/v1/auth/dev` | no (solo staging con `DEV_LOGIN_KEY`) | `{ key, name }` | `Session` |
 | POST | `/v1/auth/refresh` | no | `RefreshRequest` | `Session` |
-| POST | `/v1/auth/logout` | sí | `RefreshRequest` | `Ok` |
+| POST | `/v1/auth/logout` | sí | `LogoutRequest` (incluye `pushToken` opcional) | `Ok` |
 | GET | `/v1/me` | sí | — | `Me` |
 | PATCH | `/v1/me` | sí | `UpdateMeRequest` | `Me` |
-| DELETE | `/v1/me` | sí | — | `Ok` |
+| DELETE | `/v1/me` | sí | `DeleteMeRequest` (`idToken` de Google recién obtenido) | `Ok` |
 | PUT | `/v1/me/push-token` | sí | `PushTokenRequest` | `Ok` |
 | GET | `/v1/groups` | sí | — | `GroupList` |
 | POST | `/v1/groups` | sí | `CreateGroupRequest` | `GroupDetail` (201) |

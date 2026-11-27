@@ -1,4 +1,5 @@
 import type { NotificationEvent, NotificationService, UserId } from '@entre-nos/domain';
+import { runInBackground } from './background.js';
 import type { PushTokenStore } from './platform.js';
 
 /**
@@ -104,6 +105,10 @@ export class ExpoPushService implements NotificationService {
   ) {}
 
   async notify(userIds: readonly UserId[], event: NotificationEvent): Promise<void> {
+    runInBackground(this.deliver(userIds, event));
+  }
+
+  private async deliver(userIds: readonly UserId[], event: NotificationEvent): Promise<void> {
     try {
       const targets = await this.tokens.listForUsers([...new Set(userIds)]);
       if (targets.length === 0) return;

@@ -7,10 +7,12 @@ import type { Collections, PushTokenDoc, SessionDoc } from './mongo.js';
 export interface SessionStore {
   create(doc: SessionDoc): Promise<void>;
   findByCurrent(hash: string): Promise<SessionDoc | null>;
-  findByPrevious(hash: string): Promise<SessionDoc | null>;
+  /** Family in which this hash was already used (rotated away). */
+  findByUsed(hash: string): Promise<SessionDoc | null>;
   /** Atomic rotation: only succeeds if `currentHash` is still `expected`. */
   rotate(id: string, expected: string, next: string, now: Date, expiresAt: Date): Promise<boolean>;
   revoke(id: string): Promise<void>;
+  revokeAllForUser(userId: string): Promise<void>;
   isActive(id: string, now: Date): Promise<boolean>;
 }
 
@@ -18,6 +20,7 @@ export interface PushTokenStore {
   put(token: string, userId: string, now: Date): Promise<void>;
   listForUsers(userIds: readonly string[]): Promise<{ token: string; userId: string }[]>;
   remove(tokens: readonly string[]): Promise<void>;
+  removeOwned(token: string, userId: string): Promise<void>;
   removeForUser(userId: string): Promise<void>;
 }
 
@@ -36,18 +39,24 @@ export class MongoSessions implements SessionStore {
   findByCurrent(hash: string) {
     return this.c.sessions.findOne({ currentHash: hash });
   }
-  findByPrevious(hash: string) {
-    return this.c.sessions.findOne({ previousHash: hash });
+  findByUsed(hash: string) {
+    return this.c.sessions.findOne({ usedHashes: hash });
   }
   async rotate(id: string, expected: string, next: string, now: Date, expiresAt: Date) {
     const r = await this.c.sessions.updateOne(
       { _id: id, currentHash: expected, revoked: false },
-      { $set: { currentHash: next, previousHash: expected, rotatedAt: now, expiresAt } },
+      {
+        $set: { currentHash: next, previousHash: expected, rotatedAt: now, expiresAt },
+        $push: { usedHashes: { $each: [expected], $slice: -200 } },
+      },
     );
     return r.modifiedCount === 1;
   }
   async revoke(id: string) {
     await this.c.sessions.updateOne({ _id: id }, { $set: { revoked: true } });
+  }
+  async revokeAllForUser(userId: string) {
+    await this.c.sessions.updateMany({ userId }, { $set: { revoked: true } });
   }
   async isActive(id: string, now: Date) {
     const d = await this.c.sessions.findOne(
@@ -77,6 +86,9 @@ export class MongoPushTokens implements PushTokenStore {
   }
   async removeForUser(userId: string) {
     await this.c.pushTokens.deleteMany({ userId });
+  }
+  async removeOwned(token: string, userId: string) {
+    await this.c.pushTokens.deleteOne({ _id: token, userId });
   }
 }
 
@@ -109,19 +121,23 @@ export class MemorySessions implements SessionStore {
     for (const d of this.data.values()) if (d.currentHash === hash) return { ...d };
     return null;
   }
-  async findByPrevious(hash: string) {
-    for (const d of this.data.values()) if (d.previousHash === hash) return { ...d };
+  async findByUsed(hash: string) {
+    for (const d of this.data.values()) if (d.usedHashes.includes(hash)) return { ...d };
     return null;
   }
   async rotate(id: string, expected: string, next: string, now: Date, expiresAt: Date) {
     const d = this.data.get(id);
     if (!d || d.revoked || d.currentHash !== expected) return false;
     Object.assign(d, { currentHash: next, previousHash: expected, rotatedAt: now, expiresAt });
+    d.usedHashes = [...d.usedHashes, expected].slice(-200);
     return true;
   }
   async revoke(id: string) {
     const d = this.data.get(id);
     if (d) d.revoked = true;
+  }
+  async revokeAllForUser(userId: string) {
+    for (const d of this.data.values()) if (d.userId === userId) d.revoked = true;
   }
   async isActive(id: string, now: Date) {
     const d = this.data.get(id);
@@ -144,6 +160,9 @@ export class MemoryPushTokens implements PushTokenStore {
   }
   async removeForUser(userId: string) {
     for (const [t, u] of this.data) if (u === userId) this.data.delete(t);
+  }
+  async removeOwned(token: string, userId: string) {
+    if (this.data.get(token) === userId) this.data.delete(token);
   }
 }
 

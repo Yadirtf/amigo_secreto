@@ -78,6 +78,15 @@ export const DevSignInRequest = z.strictObject({
 export const RefreshRequest = z.strictObject({
   refreshToken: z.string().min(20).max(200),
 });
+export const LogoutRequest = z.strictObject({
+  refreshToken: z.string().min(20).max(200),
+  /** The device's push token, so this phone stops receiving notifications. */
+  pushToken: z.string().max(200).optional(),
+});
+/** Deleting the account needs a fresh Google sign-in (threat model PT-08). */
+export const DeleteMeRequest = z.strictObject({
+  idToken: z.string().min(20).max(4096).optional(),
+});
 export const Me = z.object({
   id: Id,
   name: z.string(),
@@ -125,7 +134,6 @@ export const MemberView = PublicProfile.extend({
   participates: z.boolean(),
   isOrganizer: z.boolean(),
   isMe: z.boolean(),
-  hasSeenAssignment: z.boolean(),
 });
 export type MemberView = z.infer<typeof MemberView>;
 
@@ -139,7 +147,7 @@ export const GroupDetail = GroupSummary.extend({
   drawnAt: IsoDateTime.nullable(),
   revealedAt: IsoDateTime.nullable(),
   canDraw: z.boolean(),
-  memberLimit: z.number().int().nullable(),
+  memberLimit: z.number().int(),
   redrawsLeft: z.number().int(),
 });
 export type GroupDetail = z.infer<typeof GroupDetail>;

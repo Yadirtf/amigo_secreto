@@ -66,6 +66,10 @@ export interface SessionDoc {
   userId: string;
   currentHash: string;
   previousHash: string | null;
+  /** Every refresh hash already used in this family (reuse detection, PT-04). */
+  usedHashes: string[];
+  /** Absolute end of the family, regardless of rotations (PT-13). */
+  absoluteExpiresAt: Date;
   rotatedAt: Date;
   expiresAt: Date;
   revoked: boolean;
@@ -128,7 +132,7 @@ export async function ensureIndexes(c: Collections): Promise<void> {
     c.messages.createIndex({ groupId: 1 }),
     c.wishlists.createIndex({ groupId: 1 }),
     c.sessions.createIndex({ currentHash: 1 }, { unique: true }),
-    c.sessions.createIndex({ previousHash: 1 }),
+    c.sessions.createIndex({ usedHashes: 1 }),
     c.sessions.createIndex({ userId: 1 }),
     c.sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
     c.pushTokens.createIndex({ userId: 1 }),

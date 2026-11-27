@@ -44,6 +44,8 @@ export interface Group {
   premium: boolean;
   members: Member[];
   exclusions: Exclusion[];
+  /** Users the organizer removed; they can't rejoin with the invite (PT-03). */
+  bannedUserIds?: UserId[];
   /** How many draws were executed (1 = first draw). Visible to everyone. */
   drawCount: number;
   drawnAt: Date | null;

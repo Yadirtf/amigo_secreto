@@ -39,6 +39,7 @@ import type { PushTokenStore, RateLimiter } from '../infra/platform.js';
 import { HttpError, toErrorResponse } from './errors.js';
 import { landingPage, assetLinks } from './landing.js';
 import { openApiDocument } from './openapi.js';
+import { drainBackground } from '../infra/background.js';
 
 export interface AppConfig {
   appEnv: 'staging' | 'production' | 'test';
@@ -145,6 +146,15 @@ export function createApp(getContainer: (c: Context) => Promise<Container> | Con
   app.use('*', async (c, next) => {
     c.set('container', await getContainer(c));
     await next();
+    // Push notifications run after the response (PT-10).
+    const pending = drainBackground();
+    if (pending) {
+      try {
+        c.executionCtx.waitUntil(pending);
+      } catch {
+        await pending; // tests / runtimes without an execution context
+      }
+    }
   });
 
   app.get('/health', (c) => c.json({ ok: true }));
@@ -244,8 +254,10 @@ export function createApp(getContainer: (c: Context) => Promise<Container> | Con
   const deps = (c: Ctx) => c.get('container').deps;
 
   v1.post('/auth/logout', async (c) => {
-    const { refreshToken } = await body(c, C.RefreshRequest);
-    await c.get('container').tokens.revoke(refreshToken, me(c));
+    const { refreshToken, pushToken } = await body(c, C.LogoutRequest);
+    const { tokens, pushTokens } = c.get('container');
+    await tokens.revoke(refreshToken, me(c));
+    if (pushToken) await pushTokens.removeOwned(pushToken, me(c));
     return ok(c);
   });
 
@@ -255,8 +267,19 @@ export function createApp(getContainer: (c: Context) => Promise<Container> | Con
     return send(c, C.Me, await updateProfile(deps(c), me(c), input));
   });
   v1.delete('/me', async (c) => {
+    // Re-authentication: a stolen access token alone can't delete the account.
+    const { idToken } = await body(c, C.DeleteMeRequest);
+    const { google, config, tokens, pushTokens } = c.get('container');
+    const user = await deps(c).users.findById(me(c));
+    if (!user) throw new HttpError('NOT_FOUND');
+    const isDevUser = (user.googleSub ?? '').startsWith('dev:') && config.appEnv !== 'production';
+    if (!isDevUser) {
+      const identity = idToken ? await google.verify(idToken) : null;
+      if (!identity || identity.sub !== user.googleSub) throw new HttpError('UNAUTHORIZED');
+    }
     await deleteAccount(deps(c), me(c));
-    await c.get('container').pushTokens.removeForUser(me(c));
+    await pushTokens.removeForUser(me(c));
+    await tokens.revokeAll(me(c));
     return ok(c);
   });
   v1.put('/me/push-token', async (c) => {

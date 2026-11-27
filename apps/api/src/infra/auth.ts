@@ -50,6 +50,8 @@ export class JoseGoogleVerifier implements GoogleVerifier {
 
 const ACCESS_TTL_S = 15 * 60;
 const REFRESH_TTL_MS = 30 * 86_400_000;
+/** A session family never lives longer than this, even if used daily. */
+const ABSOLUTE_TTL_MS = 90 * 86_400_000;
 /** A refresh replayed within this window (parallel requests) is refused without revoking. */
 const REUSE_GRACE_MS = 15_000;
 const ISSUER = 'entre-nos-api';
@@ -93,8 +95,10 @@ export class TokenService {
       userId,
       currentHash: await sha256(refreshToken),
       previousHash: null,
+      usedHashes: [],
       rotatedAt: now,
       expiresAt: new Date(now.getTime() + REFRESH_TTL_MS),
+      absoluteExpiresAt: new Date(now.getTime() + ABSOLUTE_TTL_MS),
       revoked: false,
     });
     return { ...(await this.access(userId, id, now)), refreshToken };
@@ -108,15 +112,14 @@ export class TokenService {
     const hash = await sha256(refreshToken);
     const current = await this.sessions.findByCurrent(hash);
     if (current) {
-      if (current.revoked || current.expiresAt <= now) return null;
+      if (current.revoked || current.expiresAt <= now || current.absoluteExpiresAt <= now) {
+        return null;
+      }
       const next = randomToken(32);
-      const ok = await this.sessions.rotate(
-        current._id,
-        hash,
-        await sha256(next),
-        now,
-        new Date(now.getTime() + REFRESH_TTL_MS),
+      const expiresAt = new Date(
+        Math.min(now.getTime() + REFRESH_TTL_MS, current.absoluteExpiresAt.getTime()),
       );
+      const ok = await this.sessions.rotate(current._id, hash, await sha256(next), now, expiresAt);
       if (!ok) return null;
       return {
         ...(await this.access(current.userId, current._id, now)),
@@ -124,9 +127,13 @@ export class TokenService {
         userId: current.userId,
       };
     }
-    const old = await this.sessions.findByPrevious(hash);
-    if (old && now.getTime() - old.rotatedAt.getTime() > REUSE_GRACE_MS) {
-      await this.sessions.revoke(old._id);
+    // Reuse of any already-rotated token revokes the family (PT-04), except the
+    // immediately previous one within a short grace window (parallel refresh).
+    const old = await this.sessions.findByUsed(hash);
+    if (old) {
+      const graceful =
+        old.previousHash === hash && now.getTime() - old.rotatedAt.getTime() <= REUSE_GRACE_MS;
+      if (!graceful) await this.sessions.revoke(old._id);
     }
     return null;
   }
@@ -134,6 +141,11 @@ export class TokenService {
   async revoke(refreshToken: string, userId: string): Promise<void> {
     const s = await this.sessions.findByCurrent(await sha256(refreshToken));
     if (s && s.userId === userId) await this.sessions.revoke(s._id);
+  }
+
+  /** Revokes every session of a user (account deletion). */
+  async revokeAll(userId: string): Promise<void> {
+    await this.sessions.revokeAllForUser(userId);
   }
 
   /** Verifies an access token and that its session is still active. */

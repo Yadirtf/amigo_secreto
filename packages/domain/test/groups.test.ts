@@ -36,7 +36,7 @@ describe('createGroup', () => {
       isOrganizer: true,
       budgetCop: 80_000,
       canDraw: false,
-      memberLimit: null,
+      memberLimit: 100,
       drawCount: 0,
     });
     expect(g.inviteCode).toMatch(/^[2-9A-Z]{10}$/);
@@ -103,6 +103,26 @@ describe('join / preview / list', () => {
     await runDraw(deps, org, groupId);
     const late = await user(deps, 'late');
     await expect(joinGroup(deps, late, code)).rejects.toMatchObject({ code: 'GROUP_LOCKED' });
+  });
+  it('bans members removed by the organizer and rotates the code (PT-03)', async () => {
+    const { deps, org, groupId, code, members } = await groupWith(3);
+    const out = members[0] as string;
+    await removeMember(deps, org, groupId, out);
+    const g = await getGroup(deps, org, groupId);
+    expect(g.inviteCode).not.toBe(code);
+    await expect(joinGroup(deps, out, g.inviteCode)).rejects.toMatchObject({
+      code: 'INVITE_INVALID',
+    });
+    // Leaving voluntarily is not a ban and keeps the code.
+    const leaver = members[1] as string;
+    await removeMember(deps, leaver, groupId, leaver);
+    const again = await joinGroup(deps, leaver, g.inviteCode);
+    expect(again.memberCount).toBe(3);
+  });
+  it('applies a hard member cap even when the free limit is off (PT-05)', async () => {
+    const { deps, code } = await groupWith(2, { policy: { maxMembersHard: 3 } });
+    const extra = await user(deps, 'extra');
+    await expect(joinGroup(deps, extra, code)).rejects.toMatchObject({ code: 'GROUP_FULL' });
   });
   it('enforces the member limit only when the policy sets one', async () => {
     const { deps, code } = await groupWith(2, { policy: { maxMembersFree: 3 } });
@@ -213,6 +233,14 @@ describe('organizer actions', () => {
     expect(g.canDraw).toBe(true);
     const back = await setOrganizerParticipation(deps, org, groupId, true);
     expect(back.members.find((m) => m.isMe)?.participates).toBe(true);
+  });
+  it('caps exclusions per person', async () => {
+    const { deps, org, groupId, members } = await groupWith(5);
+    const pairs = members.map((m): [string, string] => [org, m]);
+    await expect(setExclusions(deps, org, groupId, pairs)).rejects.toMatchObject({
+      code: 'INVALID_INPUT',
+      details: { max: 4 },
+    });
   });
   it('validates and dedupes exclusions', async () => {
     const { deps, org, groupId, members } = await groupWith(3);
