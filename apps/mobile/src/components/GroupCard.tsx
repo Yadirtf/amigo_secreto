@@ -57,11 +57,11 @@ export function GroupCard({ group, onPress, pendingReveal, onReveal }: GroupCard
               {`${people} · Entrega ${formatDayShort(group.deliveryDate)}`}
             </Text>
             <View style={styles.chips}>
+              <CountdownBadge daysLeft={group.daysLeft} />
               <StatusChip kind={status.kind} label={status.label} />
               {group.isOrganizer ? <StatusChip kind="organizer" label="Organizas tú" /> : null}
             </View>
           </View>
-          <CountdownBadge daysLeft={group.daysLeft} />
         </View>
         {pendingReveal ? (
           <Pressable
@@ -93,6 +93,6 @@ export function GroupCard({ group, onPress, pendingReveal, onReveal }: GroupCard
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-start' },
   body: { flex: 1, gap: 4 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 4 },
   strip: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 48 },
 });

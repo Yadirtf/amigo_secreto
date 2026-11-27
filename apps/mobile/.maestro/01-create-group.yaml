@@ -8,6 +8,7 @@ tags:
     file: subflows/dev-login.yaml
     env:
       NAME: Laura E2E
+- takeScreenshot: shots/${THEME}-01-groups-empty
 # First run shows the empty state; later runs (same staging user) show the list.
 - tapOn:
     id: empty-create-group
@@ -27,6 +28,7 @@ tags:
     id: group-budget-input
 - inputText: '50000'
 - hideKeyboard
+- takeScreenshot: shots/${THEME}-02-create-form
 - tapOn:
     id: group-form-submit
 - extendedWaitUntil:
@@ -36,6 +38,7 @@ tags:
 - assertVisible: 'Invita a tu gente'
 - assertVisible:
     id: invite-code
+- takeScreenshot: shots/${THEME}-03-invite-sheet
 - back
 - assertVisible:
     id: group-screen
@@ -43,6 +46,7 @@ tags:
 - assertVisible: '$ 50.000 por regalo'
 - assertVisible:
     id: group-code
+- takeScreenshot: shots/${THEME}-04-group
 # Fewer than 3 people: the draw button opens the invite sheet and a toast,
 # drawn inside the sheet's window, explains why.
 - scrollUntilVisible:

@@ -19,3 +19,4 @@ tags:
 - assertVisible:
     id: join-submit
     enabled: false
+- takeScreenshot: shots/${THEME}-05-join-error

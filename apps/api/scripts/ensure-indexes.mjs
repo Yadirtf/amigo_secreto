@@ -1,12 +1,13 @@
 // Creates MongoDB indexes (idempotent). Run in CI before deploying:
-//   MONGODB_URI=... node apps/api/scripts/ensure-indexes.mjs
+//   MONGODB_URI=... [MONGODB_DB=name] node apps/api/scripts/ensure-indexes.mjs
 import { MongoClient } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
 if (!uri) throw new Error('MONGODB_URI is required');
 const client = new MongoClient(uri, { serverSelectionTimeoutMS: 10_000 });
 await client.connect();
-const db = client.db();
+const db = client.db(process.env.MONGODB_DB || undefined);
+console.log(`Indexes for database: ${db.databaseName}`);
 const t0 = Date.now();
 const idx = (name, spec, opts = {}) => db.collection(name).createIndex(spec, opts);
 await Promise.all([

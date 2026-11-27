@@ -1,0 +1,25 @@
+# Offline: a user with a group opens the app without connection and still
+# sees their groups from the on-device cache, with the offline banner.
+appId: com.entrenos.amigosecreto
+name: Sin conexión
+tags:
+  - e2e
+---
+- runFlow:
+    file: subflows/dev-login.yaml
+    env:
+      NAME: Laura E2E
+- extendedWaitUntil:
+    visible: 'Oficina E2E'
+    timeout: 20000
+- setAirplaneMode: enabled
+- stopApp
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: offline-banner
+    timeout: 30000
+- assertVisible: 'Oficina E2E'
+- takeScreenshot: shots/${THEME}-14-offline
+- setAirplaneMode: disabled

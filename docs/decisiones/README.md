@@ -17,3 +17,4 @@ Formato: contexto → decisión → consecuencias. Una decisión por archivo, nu
 | 0011 | [Identidad visual "Sobremesa"](0011-identidad-visual.md) | Aceptada |
 | 0012 | [Inicio de sesión de prueba (solo staging)](0012-login-de-prueba.md) | Aceptada |
 | 0013 | [Conexión a MongoDB: un cliente por petición](0013-conexion-mongo-por-peticion.md) | Aceptada |
+| 0014 | [Staging y producción en un mismo clúster de Atlas](0014-staging-y-produccion-en-un-cluster.md) | Aceptada |

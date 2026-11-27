@@ -19,6 +19,8 @@ import { BackgroundQueue } from './infra/background.js';
 export interface WorkerEnv {
   APP_ENV: 'staging' | 'production';
   MONGODB_URI: string;
+  /** Database name; overrides the one in the URI so both envs can share a cluster. */
+  MONGODB_DB?: string;
   JWT_SECRET: string;
   ASSIGNMENT_KEY: string;
   GOOGLE_CLIENT_IDS: string;
@@ -60,7 +62,7 @@ function cipherFor(secret: string): Promise<AssignmentCipher> {
 export async function containerFromEnv(env: WorkerEnv): Promise<Container> {
   const client = newMongoClient(env.MONGODB_URI);
   const background = new BackgroundQueue();
-  const c = collections(client.db());
+  const c = collections(client.db(env.MONGODB_DB?.trim() || undefined));
   const cipher = await cipherFor(env.ASSIGNMENT_KEY);
   const pushTokens = new MongoPushTokens(c);
   const maxFree = env.MAX_MEMBERS_FREE ? Number(env.MAX_MEMBERS_FREE) : null;

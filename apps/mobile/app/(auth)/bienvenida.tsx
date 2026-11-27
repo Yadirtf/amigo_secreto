@@ -108,7 +108,7 @@ export default function WelcomeScreen() {
             ? 'Entra para unirte al grupo'
             : 'El amigo secreto, sin papelitos ni enredos'}
         </Text>
-        <View style={{ gap: theme.space.md }}>
+        <View style={[styles.stretch, { gap: theme.space.md }]}>
           {BULLETS.map((b) => (
             <View key={b} style={styles.bullet}>
               <Icon name="success" color="secondary" />
@@ -119,7 +119,7 @@ export default function WelcomeScreen() {
           ))}
         </View>
         {pendingCode ? (
-          <Card testID="welcome-invite-card">
+          <Card testID="welcome-invite-card" style={styles.stretch}>
             <View style={styles.bullet}>
               <Icon name="gift" color="primary" />
               <View style={styles.flex}>
@@ -251,6 +251,8 @@ const styles = StyleSheet.create({
   hero: { alignItems: 'flex-start' },
   bullet: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   flex: { flex: 1 },
+  // The hero aligns to flex-start; rows with flex:1 text must stretch or the text gets 0 width.
+  stretch: { alignSelf: 'stretch' },
   google: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
   g: { fontSize: 20 },
   legal: {

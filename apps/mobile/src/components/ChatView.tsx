@@ -241,63 +241,66 @@ export function ChatView({
             : 'Quien te regala te escribe en secreto. Tú no sabes quién es.'
         }
       />
-      <FlatList
-        style={styles.flex}
-        data={rows}
-        inverted
-        keyExtractor={(r) => r.key}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[rows.length === 0 && styles.grow, { gap: theme.space.sm }]}
-        renderItem={({ item }) => (
-          <ChatBubble
-            text={item.text}
-            mine={item.mine}
-            time={item.time}
-            status={item.status}
-            authorLabel={item.mine ? myLabel : otherLabel}
-            onPress={
-              item.status === 'failed' && item.tempId
-                ? () => {
-                    const o = outbox.find((x) => x.tempId === item.tempId);
-                    if (o) void retry(o);
-                  }
-                : undefined
+      {rows.length === 0 ? (
+        // Rendered outside the inverted list: on Android an inverted list's empty
+        // component ends up rotated, whatever counter-transform we apply.
+        <View style={styles.flex}>
+          <EmptyState
+            icon="chat"
+            title={giver ? 'Pregúntale algo' : 'Todavía no hay mensajes'}
+            body={
+              giver
+                ? 'Pregúntale algo para atinarle al regalo, por ejemplo: ¿te gusta más el dulce o lo salado?'
+                : 'Cuando quien te regala te escriba, lo verás aquí.'
             }
-            onLongPress={
-              !item.mine && item.status !== 'reported'
-                ? () => setActionsFor(messageById(item.messageId))
-                : undefined
-            }
-            testID={`bubble-${item.key}`}
+            testID="chat-empty"
           />
-        )}
-        ListEmptyComponent={
-          <View style={[styles.flex, styles.invert]}>
-            <EmptyState
-              icon="chat"
-              title={giver ? 'Pregúntale algo' : 'Todavía no hay mensajes'}
-              body={
-                giver
-                  ? 'Pregúntale algo para atinarle al regalo, por ejemplo: ¿te gusta más el dulce o lo salado?'
-                  : 'Cuando quien te regala te escriba, lo verás aquí.'
+        </View>
+      ) : (
+        <FlatList
+          style={styles.flex}
+          data={rows}
+          inverted
+          keyExtractor={(r) => r.key}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ gap: theme.space.sm }}
+          renderItem={({ item }) => (
+            <ChatBubble
+              text={item.text}
+              mine={item.mine}
+              time={item.time}
+              status={item.status}
+              authorLabel={item.mine ? myLabel : otherLabel}
+              onPress={
+                item.status === 'failed' && item.tempId
+                  ? () => {
+                      const o = outbox.find((x) => x.tempId === item.tempId);
+                      if (o) void retry(o);
+                    }
+                  : undefined
               }
-              testID="chat-empty"
+              onLongPress={
+                !item.mine && item.status !== 'reported'
+                  ? () => setActionsFor(messageById(item.messageId))
+                  : undefined
+              }
+              testID={`bubble-${item.key}`}
             />
-          </View>
-        }
-        ListFooterComponent={
-          hasMore && oldest ? (
-            <Button
-              variant="ghost"
-              size="small"
-              label="Ver mensajes anteriores"
-              loading={older.loading}
-              onPress={() => void older.load(oldest).catch(() => undefined)}
-              testID="chat-older"
-            />
-          ) : undefined
-        }
-      />
+          )}
+          ListFooterComponent={
+            hasMore && oldest ? (
+              <Button
+                variant="ghost"
+                size="small"
+                label="Ver mensajes anteriores"
+                loading={older.loading}
+                onPress={() => void older.load(oldest).catch(() => undefined)}
+                testID="chat-older"
+              />
+            ) : undefined
+          }
+        />
+      )}
       {composer}
 
       <BottomSheet
@@ -394,8 +397,6 @@ export function ReportSheet({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  grow: { flexGrow: 1 },
-  invert: { transform: [{ scaleY: -1 }] },
   composer: { flexDirection: 'row', alignItems: 'flex-end' },
   blockedRow: { flexDirection: 'row', alignItems: 'center' },
 });

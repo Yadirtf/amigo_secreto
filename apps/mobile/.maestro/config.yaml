@@ -8,3 +8,4 @@ executionOrder:
     - 01-create-group
     - 03-join-errors
     - 02-full-secret-santa
+    - 04-offline

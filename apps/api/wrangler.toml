@@ -10,6 +10,8 @@ crons = ["0 14 * * *"]
 
 [vars]
 APP_ENV = "staging"
+# Database name: staging and production may share one Atlas cluster (ADR-0014).
+MONGODB_DB = "entrenos_staging"
 ANDROID_PACKAGE = "com.entrenos.amigosecreto"
 PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.entrenos.amigosecreto"
 # Comma-separated SHA-256 fingerprints of the app signing certificates (App Links).
@@ -24,6 +26,7 @@ name = "entre-nos-api"
 crons = ["0 14 * * *"]
 [env.production.vars]
 APP_ENV = "production"
+MONGODB_DB = "entrenos"
 ANDROID_PACKAGE = "com.entrenos.amigosecreto"
 PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.entrenos.amigosecreto"
 ANDROID_CERT_FINGERPRINTS = ""

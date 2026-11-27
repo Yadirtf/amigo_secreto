@@ -28,7 +28,7 @@ export default {
     try {
       await c.connect();
       const t1 = Date.now();
-      const col = c.db().collection<{ _id: string; n: number; at: Date }>('spike');
+      const col = c.db('entrenos_spike').collection<{ _id: string; n: number; at: Date }>('spike');
       const id = crypto.randomUUID();
       await col.insertOne({ _id: id, n: Math.random(), at: new Date() });
       const t2 = Date.now();

@@ -107,7 +107,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         android: {
           enableMinifyInReleaseBuilds: true,
           enableShrinkResourcesInReleaseBuilds: true,
-          enableBundleCompression: true,
+          // Uncompressed bundle: Hermes can mmap it, faster cold start on low-end phones
+          // (Play compresses the download anyway).
+          enableBundleCompression: false,
           // Only the CI e2e build talks to a local http API (10.0.2.2).
           usesCleartextTraffic: process.env.E2E_CLEARTEXT === '1',
           manifestQueries: {
