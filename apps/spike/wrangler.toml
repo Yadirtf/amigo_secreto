@@ -4,3 +4,18 @@ main = "src/index.ts"
 compatibility_date = "2026-11-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
+
+# Strategy B (ADR-0013): a Durable Object that keeps the connection warm.
+# SQLite-backed classes are the ones available on the free plan.
+[[durable_objects.bindings]]
+name = "GATEWAY"
+class_name = "MongoGateway"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["MongoGateway"]
+
+# Run next to Atlas (AWS us-east-1): the handshake costs many round trips, so
+# the Worker should sit beside the database, not beside the user (ADR-0013).
+[placement]
+region = "aws:us-east-1"
