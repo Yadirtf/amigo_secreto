@@ -350,9 +350,26 @@ describe('end to end flow', () => {
       body: { name: 'Nuevo Nombre' },
     });
     expect(me.json.name).toBe('Nuevo Nombre');
-    expect((await h.call('DELETE', '/v1/me', { token: s.accessToken })).status).toBe(200);
+    // Needs a fresh Google sign-in of the same account (PT-08).
+    expect((await h.call('DELETE', '/v1/me', { token: s.accessToken, body: {} })).status).toBe(401);
+    expect(
+      (
+        await h.call('DELETE', '/v1/me', {
+          token: s.accessToken,
+          body: { idToken: 'google-test-token:other:X' },
+        })
+      ).status,
+    ).toBe(401);
+    expect(
+      (
+        await h.call('DELETE', '/v1/me', {
+          token: s.accessToken,
+          body: { idToken: 'google-test-token:newbie:Nuevo' },
+        })
+      ).status,
+    ).toBe(200);
     expect(h.pushTokens.data.size).toBe(0);
-    expect((await h.call('GET', '/v1/me', { token: s.accessToken })).status).toBe(404);
+    expect((await h.call('GET', '/v1/me', { token: s.accessToken })).status).toBe(401);
   });
 });
 

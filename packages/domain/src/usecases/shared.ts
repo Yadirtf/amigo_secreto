@@ -36,6 +36,7 @@ export function cloneGroup(g: Group): Group {
     revealedAt: g.revealedAt ? new Date(g.revealedAt) : null,
     createdAt: new Date(g.createdAt),
     members: g.members.map((m) => ({ ...m, joinedAt: new Date(m.joinedAt) })),
+    bannedUserIds: [...(g.bannedUserIds ?? [])],
     exclusions: g.exclusions.map(([a, b]) => [a, b]),
   };
 }
@@ -63,8 +64,10 @@ export function participantsOf(group: Group): UserId[] {
   return group.members.filter((m) => m.participates).map((m) => m.userId);
 }
 
-export function memberLimit(group: Group, deps: Pick<Deps, 'policy'>): number | null {
-  return group.premium ? deps.policy.maxMembersPremium : deps.policy.maxMembersFree;
+/** Effective member limit: the plan limit, never above the hard cap (PT-05). */
+export function memberLimit(group: Group, deps: Pick<Deps, 'policy'>): number {
+  const plan = group.premium ? deps.policy.maxMembersPremium : deps.policy.maxMembersFree;
+  return Math.min(plan ?? deps.policy.maxMembersHard, deps.policy.maxMembersHard);
 }
 
 export interface PublicProfile {

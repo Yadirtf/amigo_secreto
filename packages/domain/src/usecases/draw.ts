@@ -1,7 +1,7 @@
 import type { Assignment, Group, GroupId, UserId, Wish } from '../entities.js';
 import { DomainError } from '../errors.js';
 import type { Deps } from '../ports.js';
-import { allowedRecipients, draw, isValidDraw } from '../rules/draw.js';
+import { draw, isValidDraw, realOptions } from '../rules/draw.js';
 
 /** Minimum possible recipients per participant after exclusions. */
 export const MIN_OPTIONS = 2;
@@ -51,14 +51,23 @@ async function executeDraw(
       }
     }
     const participants = participantsOf(g);
-    const allowed = allowedRecipients(participants, g.exclusions);
-    const tooFew = participants.filter((p) => (allowed.get(p)?.size ?? 0) < MIN_OPTIONS);
-    if (participants.length >= 3 && tooFew.length > 0) {
-      // Everybody keeps at least 2 possible recipients, so exclusions can't be
-      // used to force a specific pair.
-      throw new DomainError('DRAW_IMPOSSIBLE', 'too many exclusions for some people', {
-        blocking: tooFew,
-      });
+    if (participants.length >= 3) {
+      // Everybody must keep at least 2 recipients AND 2 possible givers that can
+      // really occur in some valid draw, so exclusions can't force a pair
+      // (threat model PT-02).
+      const options = realOptions(participants, g.exclusions);
+      if (options.feasible) {
+        const tooFew = participants.filter(
+          (p) =>
+            (options.asGiver.get(p) ?? 0) < MIN_OPTIONS ||
+            (options.asReceiver.get(p) ?? 0) < MIN_OPTIONS,
+        );
+        if (tooFew.length > 0) {
+          throw new DomainError('DRAW_IMPOSSIBLE', 'too many exclusions for some people', {
+            blocking: tooFew,
+          });
+        }
+      }
     }
     const result = draw(participants, g.exclusions, deps.random);
     if (!result.ok) {
