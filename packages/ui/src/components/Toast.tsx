@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { AccessibilityInfo, Pressable, StyleSheet } from 'react-native';
+import { AccessibilityInfo, Keyboard, Pressable, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeOut, SlideInDown, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { IconName } from '../icons';
@@ -60,7 +60,13 @@ export function ToastOutlet({ bottomOffset = 24 }: { bottomOffset?: number }) {
   useEffect(() => register?.(id), [register, id]);
   if (!api?.toast || api.top !== id) return null;
   return (
-    <ToastView key={api.toast.id} toast={api.toast} onHide={api.hide} bottomOffset={bottomOffset} />
+    <ToastView
+      key={api.toast.id}
+      toast={api.toast}
+      onHide={api.hide}
+      bottomOffset={bottomOffset}
+      avoidKeyboard
+    />
   );
 }
 
@@ -131,18 +137,37 @@ export function ToastProvider({
   );
 }
 
+/** Keeps the toast above the keyboard (forms in sheets confirm with toasts). */
+function useKeyboardHeight(): number {
+  const [height, setHeight] = useState(() => Keyboard.metrics()?.height ?? 0);
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', (e) => setHeight(e.endCoordinates.height));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setHeight(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return height;
+}
+
 function ToastView({
   toast,
   onHide,
   bottomOffset,
+  avoidKeyboard = false,
 }: {
   toast: ToastState;
   onHide: () => void;
   bottomOffset: number;
+  /** Modal windows don't resize with the keyboard: lift the toast above it. */
+  avoidKeyboard?: boolean;
 }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const reduced = useReducedMotion();
+  const keyboardHeight = useKeyboardHeight();
+  const keyboard = avoidKeyboard ? keyboardHeight : 0;
   const dark = theme.scheme === 'dark';
   const bg = dark ? theme.color.surfaceAlt : theme.color.textPrimary;
   const fg = dark ? theme.color.textPrimary : theme.color.surface;
@@ -159,7 +184,10 @@ function ToastView({
       pointerEvents="box-none"
       style={[
         styles.host,
-        { bottom: Math.max(insets.bottom, 16) + bottomOffset, zIndex: theme.zIndex.toast },
+        {
+          bottom: keyboard > 0 ? keyboard + 16 : Math.max(insets.bottom, 16) + bottomOffset,
+          zIndex: theme.zIndex.toast,
+        },
       ]}
     >
       <Pressable
