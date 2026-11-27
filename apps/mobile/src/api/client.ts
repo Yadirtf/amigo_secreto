@@ -112,12 +112,11 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
   /** Single-flight refresh: concurrent 401s share one refresh call. */
   function refreshOnce(): Promise<string | null> {
     if (!refreshing) {
-      refreshing = options.tokens
-        .refresh()
-        .catch(() => null)
-        .finally(() => {
-          refreshing = null;
-        });
+      // A network failure during refresh propagates (the session is kept);
+      // only a definitive "no" (null) ends the session.
+      refreshing = options.tokens.refresh().finally(() => {
+        refreshing = null;
+      });
     }
     return refreshing;
   }
