@@ -1,8 +1,13 @@
 # Joins the group whose code is in env CODE.
 appId: com.entrenos.amigosecreto
 ---
+# New users see the empty state; users with groups see the list header.
+- tapOn:
+    id: empty-join-code
+    optional: true
 - tapOn:
     id: join-code-button
+    optional: true
 - tapOn:
     id: join-code-input
 - inputText: ${CODE}
