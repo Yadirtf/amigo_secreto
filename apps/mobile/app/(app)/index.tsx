@@ -150,7 +150,9 @@ export default function MyGroupsScreen() {
               group={g}
               pendingReveal={pendingReveal(g)}
               onPress={() => router.push({ pathname: '/grupo/[id]', params: { id: g.id } })}
-              onReveal={() => router.push({ pathname: '/grupo/[id]/revelar', params: { id: g.id } })}
+              onReveal={() =>
+                router.push({ pathname: '/grupo/[id]/revelar', params: { id: g.id } })
+              }
             />
           ))}
         </View>

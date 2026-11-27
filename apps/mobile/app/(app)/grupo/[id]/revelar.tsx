@@ -56,7 +56,9 @@ function RevealFlow() {
   const markDrawSeen = usePrefs((s) => s.markDrawSeen);
   const drawCount = g?.drawCount ?? assignment.data?.drawNumber;
   const [step, setStep] = useState<Step>(() =>
-    seen !== undefined && drawCount !== undefined && seen !== drawCount ? 'redrawNotice' : 'privacy',
+    seen !== undefined && drawCount !== undefined && seen !== drawCount
+      ? 'redrawNotice'
+      : 'privacy',
   );
 
   const onRevealed = (a: MyAssignment) => {
@@ -71,7 +73,12 @@ function RevealFlow() {
         topBar={{ onBack: goBack, backIcon: 'close' }}
         scroll={false}
         footer={
-          <Button label="Entendido" onPress={() => setStep('privacy')} fullWidth testID="reveal-redraw-ok" />
+          <Button
+            label="Entendido"
+            onPress={() => setStep('privacy')}
+            fullWidth
+            testID="reveal-redraw-ok"
+          />
         }
       >
         <Centered>
@@ -328,7 +335,12 @@ function HoldAndReveal({
           {waiting ? 'Abriendo tu regalo…' : 'Mantén presionado para abrir'}
         </Text>
         {hint ? (
-          <Text variant="body" color="textSecondary" align="center" accessibilityLiveRegion="polite">
+          <Text
+            variant="body"
+            color="textSecondary"
+            align="center"
+            accessibilityLiveRegion="polite"
+          >
             {hint}
           </Text>
         ) : null}
@@ -337,11 +349,7 @@ function HoldAndReveal({
   );
 }
 
-function ProgressFrame({
-  ringProps,
-}: {
-  ringProps: Partial<{ strokeDashoffset: number }>;
-}) {
+function ProgressFrame({ ringProps }: { ringProps: Partial<{ strokeDashoffset: number }> }) {
   const theme = useTheme();
   return (
     <Svg width={RING_W} height={RING_H} style={StyleSheet.absoluteFill} pointerEvents="none">

@@ -1,0 +1,20 @@
+# Signs in with the staging-only dev login (EXPO_PUBLIC_DEV_LOGIN=1).
+# Usage: runFlow with env NAME.
+appId: com.entrenos.amigosecreto
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: welcome-screen
+    timeout: 20000
+- tapOn:
+    id: dev-login-name
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: dev-login-submit
+- extendedWaitUntil:
+    visible:
+      id: groups-screen
+    timeout: 20000

@@ -180,12 +180,7 @@ interface WishSheetProps {
 
 function WishSheet({ visible, editing, onClose, onSave }: WishSheetProps) {
   return visible ? (
-    <WishForm
-      key={editing?.id ?? 'new'}
-      editing={editing}
-      onClose={onClose}
-      onSave={onSave}
-    />
+    <WishForm key={editing?.id ?? 'new'} editing={editing} onClose={onClose} onSave={onSave} />
   ) : null;
 }
 

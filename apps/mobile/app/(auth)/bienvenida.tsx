@@ -104,7 +104,9 @@ export default function WelcomeScreen() {
       <View style={[styles.hero, { marginTop: theme.space.huge, gap: theme.space.xl }]}>
         <BrandMark size={96} dark={theme.scheme === 'dark'} />
         <Text variant="title1">
-          {pendingCode ? 'Entra para unirte al grupo' : 'El amigo secreto, sin papelitos ni enredos'}
+          {pendingCode
+            ? 'Entra para unirte al grupo'
+            : 'El amigo secreto, sin papelitos ni enredos'}
         </Text>
         <View style={{ gap: theme.space.md }}>
           {BULLETS.map((b) => (

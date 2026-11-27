@@ -1,0 +1,47 @@
+# S1 → S2 → S3 → S5: the organizer signs in and creates a group in < 30 s.
+appId: com.entrenos.amigosecreto
+name: Crear grupo
+tags:
+  - smoke
+---
+- runFlow:
+    file: subflows/dev-login.yaml
+    env:
+      NAME: Laura E2E
+# First run shows the empty state; later runs (same staging user) show the list.
+- tapOn:
+    id: empty-create-group
+    optional: true
+- tapOn:
+    id: create-group-button
+    optional: true
+- tapOn:
+    id: group-name-input
+- inputText: Oficina E2E
+- tapOn:
+    id: group-budget-input
+- inputText: '50000'
+- hideKeyboard
+- tapOn:
+    id: group-form-submit
+- extendedWaitUntil:
+    visible:
+      id: invite-sheet
+    timeout: 15000
+- assertVisible: 'Invita a tu gente'
+- assertVisible:
+    id: invite-code
+- back
+- assertVisible:
+    id: group-screen
+- assertVisible: 'Oficina E2E'
+- assertVisible: '$ 50.000 por regalo'
+- assertVisible:
+    id: group-code
+# Fewer than 3 people: the draw button explains and opens the invite sheet.
+- scrollUntilVisible:
+    element:
+      id: group-draw
+- tapOn:
+    id: group-draw
+- assertVisible: 'Necesitan al menos 3 personas.*'

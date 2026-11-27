@@ -105,9 +105,7 @@ function FriendBody({
           <View style={[styles.flex, { gap: theme.space.xs }]}>
             <Text
               variant="title3"
-              accessibilityLabel={
-                shown ? r.name : 'Nombre oculto. Toca Mostrar para verlo'
-              }
+              accessibilityLabel={shown ? r.name : 'Nombre oculto. Toca Mostrar para verlo'}
               testID="friend-name"
             >
               {shown ? r.name : '••••••'}

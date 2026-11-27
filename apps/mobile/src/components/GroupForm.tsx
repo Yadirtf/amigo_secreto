@@ -12,9 +12,16 @@ import {
   useTheme,
 } from '@entre-nos/ui';
 import { useRef, useState, type ComponentRef } from 'react';
-import { Platform, StyleSheet, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, View, type TextInput } from 'react-native';
 import { addDays, bogotaToday, deliveryDefaults } from '../lib/dates';
-import { formatDayChip, formatMoneyInput, parseIsoDay, parseMoneyInput, thousands, toIsoDay } from '../lib/format';
+import {
+  formatDayChip,
+  formatMoneyInput,
+  parseIsoDay,
+  parseMoneyInput,
+  thousands,
+  toIsoDay,
+} from '../lib/format';
 import { haptics } from '../lib/haptics';
 import { PhotoSheet } from './sheets';
 
@@ -71,7 +78,8 @@ export function GroupForm({
 
   const validate = () => {
     const next: { name?: string; budget?: string } = {};
-    if (name.trim().length < 2) next.name = 'Ponle un nombre al grupo para que todos lo reconozcan.';
+    if (name.trim().length < 2)
+      next.name = 'Ponle un nombre al grupo para que todos lo reconozcan.';
     const amount = parseMoneyInput(budget);
     if (amount === null) next.budget = 'Escribe el presupuesto por regalo, por ejemplo 50.000.';
     else if (amount < 1000) next.budget = 'El presupuesto tiene que ser de al menos $ 1.000.';

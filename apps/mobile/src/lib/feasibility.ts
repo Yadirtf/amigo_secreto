@@ -3,7 +3,13 @@
  * the same domain rules as the server (realOptions: everybody needs at least
  * 2 REAL options as giver and as receiver). Only a hint: the server decides.
  */
-import { LIMITS, MIN_OPTIONS, MIN_PARTICIPANTS, realOptions, type Exclusion } from '@entre-nos/domain';
+import {
+  LIMITS,
+  MIN_OPTIONS,
+  MIN_PARTICIPANTS,
+  realOptions,
+  type Exclusion,
+} from '@entre-nos/domain';
 
 export type Feasibility =
   | { ok: true }
@@ -32,9 +38,6 @@ export function drawFeasibility(
 }
 
 /** How many exclusions involve this person. */
-export function exclusionCount(
-  personId: string,
-  exclusions: readonly Exclusion[],
-): number {
+export function exclusionCount(personId: string, exclusions: readonly Exclusion[]): number {
   return exclusions.filter(([a, b]) => a === personId || b === personId).length;
 }

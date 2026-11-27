@@ -1,0 +1,20 @@
+# Joins the group whose code is in env CODE.
+appId: com.entrenos.amigosecreto
+---
+- tapOn:
+    id: join-code-button
+- tapOn:
+    id: join-code-input
+- inputText: ${CODE}
+- extendedWaitUntil:
+    visible:
+      id: invite-preview
+    timeout: 15000
+- tapOn:
+    id: join-submit
+- extendedWaitUntil:
+    visible:
+      id: group-screen
+    timeout: 15000
+- assertVisible:
+    id: joined-banner

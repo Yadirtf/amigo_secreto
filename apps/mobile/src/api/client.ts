@@ -161,7 +161,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
   async function toError(res: Response): Promise<ApiRequestError> {
     const retryAfterSec = parseRetryAfter(res.headers.get('Retry-After'));
-    let json: unknown = null;
+    let json: unknown;
     try {
       json = await res.json();
     } catch {

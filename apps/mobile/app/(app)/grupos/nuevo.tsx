@@ -39,7 +39,10 @@ export default function NewGroupScreen() {
               onError: (e) => {
                 // The photo is optional: if it was the problem, create without it.
                 if (photo && errorCode(e) === 'INVALID_INPUT') {
-                  toast.show({ message: 'No pudimos usar esa foto. Prueba con otra.', kind: 'error' });
+                  toast.show({
+                    message: 'No pudimos usar esa foto. Prueba con otra.',
+                    kind: 'error',
+                  });
                   send(null);
                   return;
                 }

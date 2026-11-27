@@ -1,5 +1,14 @@
 import type { Reveal } from '@entre-nos/contracts';
-import { Avatar, Button, Confetti, Icon, Screen, SectionHeader, Text, useTheme } from '@entre-nos/ui';
+import {
+  Avatar,
+  Button,
+  Confetti,
+  Icon,
+  Screen,
+  SectionHeader,
+  Text,
+  useTheme,
+} from '@entre-nos/ui';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { AccessibilityInfo, StyleSheet, View } from 'react-native';
@@ -62,7 +71,8 @@ function RevelationView({
 
   useEffect(() => {
     enter.value = withSpring(1, theme.spring.bouncy);
-    if (r.myGiver) AccessibilityInfo.announceForAccessibility(`Quien te regaló fue ${r.myGiver.name}`);
+    if (r.myGiver)
+      AccessibilityInfo.announceForAccessibility(`Quien te regaló fue ${r.myGiver.name}`);
   }, [enter, r.myGiver, theme.spring.bouncy]);
 
   const nameStyle = useAnimatedStyle(() => ({
@@ -96,12 +106,7 @@ function RevelationView({
               Quien te regaló fue…
             </Text>
             <Animated.View style={[styles.center, { gap: theme.space.sm }, nameStyle]}>
-              <Avatar
-                name={r.myGiver.name}
-                seed={r.myGiver.id}
-                photo={r.myGiver.photo}
-                size="xl"
-              />
+              <Avatar name={r.myGiver.name} seed={r.myGiver.id} photo={r.myGiver.photo} size="xl" />
               <Text variant="display" color="accentText" align="center" testID="revelation-giver">
                 {r.myGiver.name}
               </Text>

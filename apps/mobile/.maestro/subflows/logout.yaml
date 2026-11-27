@@ -1,0 +1,13 @@
+appId: com.entrenos.amigosecreto
+---
+- tapOn:
+    id: profile-button
+- scrollUntilVisible:
+    element:
+      id: profile-logout
+- tapOn:
+    id: profile-logout
+- extendedWaitUntil:
+    visible:
+      id: welcome-screen
+    timeout: 15000

@@ -15,8 +15,14 @@ export default function AppLayout() {
         animation: 'slide_from_right',
       }}
     >
-      <Stack.Screen name="grupo/[id]/revelar" options={{ animation: 'fade', gestureEnabled: false }} />
-      <Stack.Screen name="grupo/[id]/sorteo" options={{ animation: 'fade', gestureEnabled: false }} />
+      <Stack.Screen
+        name="grupo/[id]/revelar"
+        options={{ animation: 'fade', gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="grupo/[id]/sorteo"
+        options={{ animation: 'fade', gestureEnabled: false }}
+      />
     </Stack>
   );
 }

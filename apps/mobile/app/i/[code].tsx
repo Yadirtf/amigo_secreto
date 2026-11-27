@@ -89,7 +89,13 @@ function InvitePreviewScreen({ code }: { code: string }) {
             fullWidth
             testID="invite-join"
           />
-          <Button variant="ghost" label="Ahora no" onPress={close} fullWidth testID="invite-later" />
+          <Button
+            variant="ghost"
+            label="Ahora no"
+            onPress={close}
+            fullWidth
+            testID="invite-later"
+          />
         </>
       }
     >

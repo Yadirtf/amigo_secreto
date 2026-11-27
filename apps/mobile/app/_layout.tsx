@@ -1,10 +1,10 @@
-import { Fredoka_600SemiBold, Fredoka_700Bold } from '@expo-google-fonts/fredoka';
-import {
-  Nunito_400Regular,
-  Nunito_600SemiBold,
-  Nunito_700Bold,
-  Nunito_800ExtraBold,
-} from '@expo-google-fonts/nunito';
+// Per-weight imports: the package index would bundle every weight and italic.
+import { Fredoka_600SemiBold } from '@expo-google-fonts/fredoka/600SemiBold';
+import { Fredoka_700Bold } from '@expo-google-fonts/fredoka/700Bold';
+import { Nunito_400Regular } from '@expo-google-fonts/nunito/400Regular';
+import { Nunito_600SemiBold } from '@expo-google-fonts/nunito/600SemiBold';
+import { Nunito_700Bold } from '@expo-google-fonts/nunito/700Bold';
+import { Nunito_800ExtraBold } from '@expo-google-fonts/nunito/800ExtraBold';
 import { ThemeProvider, ToastProvider, useTheme, useToast } from '@entre-nos/ui';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
@@ -131,7 +131,10 @@ function AppShell() {
       >
         <Stack.Screen name="(app)" />
         <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
-        <Stack.Screen name="i/[code]" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen
+          name="i/[code]"
+          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        />
       </Stack>
       <NotificationPromptSheet />
     </>

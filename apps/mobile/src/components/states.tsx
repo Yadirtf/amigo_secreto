@@ -20,9 +20,7 @@ export function OfflineBanner({ hasData = true }: { hasData?: boolean }) {
       kind="error"
       icon="offline"
       testID="offline-banner"
-      message={
-        hasData ? OFFLINE_CACHED_MESSAGE : 'No hay conexión. Revisa tus datos o el wifi.'
-      }
+      message={hasData ? OFFLINE_CACHED_MESSAGE : 'No hay conexión. Revisa tus datos o el wifi.'}
     />
   );
 }

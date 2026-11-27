@@ -113,9 +113,7 @@ export default function ProfileScreen() {
     Application.nativeBuildVersion ?? '1'
   })`;
   const account =
-    method === 'dev'
-      ? 'Cuenta de prueba (staging)'
-      : `Cuenta: ${user.email ?? 'Google'} (Google)`;
+    method === 'dev' ? 'Cuenta de prueba (staging)' : `Cuenta: ${user.email ?? 'Google'} (Google)`;
 
   return (
     <Screen testID="profile-screen" topBar={{ title: 'Tu perfil', onBack: goBack }}>
@@ -162,11 +160,7 @@ export default function ProfileScreen() {
       </Text>
 
       <View>
-        <ListRow
-          icon="settings"
-          title="Tema"
-          detail="Sigue la configuración de tu teléfono"
-        />
+        <ListRow icon="settings" title="Tema" detail="Sigue la configuración de tu teléfono" />
         <ListRow
           icon="bell"
           title="Notificaciones"

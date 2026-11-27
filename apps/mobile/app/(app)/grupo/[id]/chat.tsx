@@ -34,7 +34,12 @@ export default function ReceiverChatScreen() {
       }}
     >
       <OfflineBanner />
-      <ChatView groupId={id} side="receiver" readOnlyNote={readOnly} onBlockRequest={menu.askBlock} />
+      <ChatView
+        groupId={id}
+        side="receiver"
+        readOnlyNote={readOnly}
+        onBlockRequest={menu.askBlock}
+      />
       {menu.element}
     </Screen>
   );

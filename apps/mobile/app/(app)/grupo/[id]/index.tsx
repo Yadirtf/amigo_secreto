@@ -370,7 +370,9 @@ function GroupDetailView({ g, autoInvite, joined, refetch }: ViewProps) {
             m={m}
             showExclusions={isOrg && open}
             exclusions={exclusionCount(m.id, g.exclusions)}
-            onRemove={isOrg && open && !m.isMe ? () => setDialog({ kind: 'remove', member: m }) : undefined}
+            onRemove={
+              isOrg && open && !m.isMe ? () => setDialog({ kind: 'remove', member: m }) : undefined
+            }
           />
         ))}
       </View>
@@ -755,8 +757,7 @@ function dialogCopy(d: Dialog, g: GroupDetail, participantCount: number) {
     case 'reveal':
       return {
         title: '¿Revelar quién le regaló a quién?',
-        message:
-          'Todos van a ver la lista completa. Hazlo cuando ya hayan entregado los regalos.',
+        message: 'Todos van a ver la lista completa. Hazlo cuando ya hayan entregado los regalos.',
         confirmLabel: 'Revelar ahora',
         confirmLoadingLabel: 'Revelando…',
         cancelLabel: 'Todavía no',
@@ -765,8 +766,7 @@ function dialogCopy(d: Dialog, g: GroupDetail, participantCount: number) {
     case 'delete':
       return {
         title: `¿Eliminar ${g.name}?`,
-        message:
-          'Se borran el sorteo, las listas y los mensajes de todos. No se puede deshacer.',
+        message: 'Se borran el sorteo, las listas y los mensajes de todos. No se puede deshacer.',
         confirmLabel: 'Eliminar grupo',
         confirmLoadingLabel: 'Eliminando…',
         confirmVariant: 'destructive' as const,
