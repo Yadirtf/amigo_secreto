@@ -19,7 +19,13 @@ run() { # $1 flow, $2 theme
   echo "::endgroup::"
 }
 
-for flow in 01-create-group 03-join-errors 02-full-secret-santa; do run "$flow" light; done
+for flow in 01-create-group 03-join-errors 02-full-secret-santa 04-offline; do run "$flow" light; done
+# Slow network (EDGE speed, GPRS latency): the join check must still work.
+adb emu network speed edge
+adb emu network delay gprs
+run 03-join-errors slow
+adb emu network speed full
+adb emu network delay none
 adb shell cmd uimode night yes
 for flow in 01-create-group 03-join-errors; do run "$flow" dark; done
 adb shell cmd uimode night no
