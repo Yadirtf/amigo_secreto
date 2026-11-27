@@ -41,6 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       monochromeImage: './assets/adaptive-icon-monochrome.png',
+      backgroundImage: './assets/adaptive-icon-background.png',
       backgroundColor: BRAND.lavender,
     },
     allowBackup: false,
@@ -72,7 +73,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-splash-screen',
       {
         image: './assets/splash-icon.png',
-        imageWidth: 120,
+        imageWidth: 200,
         resizeMode: 'contain',
         backgroundColor: BRAND.cream,
         dark: { image: './assets/splash-icon.png', backgroundColor: BRAND.plum },

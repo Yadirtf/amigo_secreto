@@ -1,7 +1,7 @@
 # Identidad visual — Entre Nos – amigo secreto
 
 Versión 1.0 · 27 nov 2026 · Rol: UX/UI
-Archivos relacionados: [`guia-de-estilo.md`](guia-de-estilo.md) (tokens y componentes), [`tokens.json`](tokens.json), [`logo.svg`](logo.svg), [`icon.svg`](icon.svg), [`flujos.md`](flujos.md), [`checklist-friccion.md`](checklist-friccion.md).
+Archivos relacionados: [`guia-de-estilo.md`](guia-de-estilo.md) (tokens y componentes), [`tokens.json`](tokens.json), [`logo-regalo.png`](logo-regalo.png), [`flujos.md`](flujos.md), [`checklist-friccion.md`](checklist-friccion.md).
 
 ## 1. Qué tiene que transmitir la marca
 
@@ -112,21 +112,21 @@ Reglas:
 
 ## 6. Logo
 
-**Concepto: "lo que queda entre nos".** Dos globos de conversación que se superponen: uno coral (la celebración, quien regala) y uno verde (la confianza, quien recibe). La zona donde se cruzan es **dorada** y lleva un pequeño destello crema: ese es el secreto, lo que solo existe entre las dos personas. Se lee también como dos personas mirándose, y la intersección recuerda un lazo/regalo. No usa símbolos navideños, así que sirve todo el año (grupos recurrentes, v2).
+**Mascota: el regalo con antifaz (desde 2026-11-27, elegida por el dueño).** Un regalo rojo con moño dorado, antifaz azul noche y el dedo sobre la boca pidiendo silencio: es el secreto "entre nos" hecho personaje. Reemplaza a la marca anterior de dos globos (`logo.svg` / `icon.svg` quedan solo como histórico).
 
-- **Logotipo** (`logo.svg`): marca + "Entre Nos" en Fredoka SemiBold `#2B1E1A` + "amigo secreto" en Nunito Bold `#6B5A53`, espaciado 1,5. Para producción, convertir los textos a contornos (o exportar a PNG) para no depender de la fuente instalada.
-- **Colores de la marca gráfica:** coral `#EE6352`, verde `#1F6F5C`, dorado `#E8B54A`, destello `#FFF8F3`. (El coral del logo es más luminoso que el `primary` porque es gráfico, no texto.)
-- **Versión sobre fondo oscuro:** mismo dibujo; texto `#F7EDE7` y `#C4B3AB`; el verde pasa a `#3FA488` para que no se pierda sobre `#1A1412`.
-- **Versión monocroma** (ícono de notificación, ícono temático de Android 13): silueta de los dos globos unidos en blanco, con el destello calado.
-- **Área de respeto:** la altura del destello alrededor de la marca. **Tamaño mínimo:** 24 dp la marca sola; 120 dp de ancho el logotipo completo.
-- **No:** rotarlo, cambiar los colores de los globos entre sí, ponerle gorro de Papá Noel, sombras o degradados.
+- **Fuente:** [`logo-regalo-original.jpg`](logo-regalo-original.jpg). [`logo-regalo.png`](logo-regalo.png) es el recorte sin fondo y [`logo-regalo-silueta.png`](logo-regalo-silueta.png) la silueta blanca con el antifaz calado. Ambos salen de `apps/mobile/scripts/cutout-logo.py`.
+- **Fondo del ícono:** degradado pastel lavanda `#D9C6FF` → `#EDE3FF` → menta `#B8E9D6`, con un halo mantequilla `#FFF4D6` detrás del regalo, confeti pastel (coral, mantequilla, menta, lavanda) y destellos blancos. El verde menta y la lavanda son los contrarios fríos del rojo y el dorado, así que el regalo resalta sin gritar. La sombra suave en el piso le da volumen.
+- **Versión monocroma** (ícono de notificación, ícono temático de Android 13): silueta del regalo con el antifaz calado.
+- **En la app:** `BrandMark` muestra la mascota sin fondo (`assets/logo-mascota.png`), que se lee bien en claro y en oscuro.
+- **No:** recolorear el regalo, recortar el moño ni ponerle gorro de Papá Noel.
 
-### Ícono de la app (`icon.svg`)
+### Ícono de la app
 
-- Ícono adaptativo de Android: **primer plano** = `icon.svg` (1024 × 1024, transparente, el dibujo cabe en el círculo seguro de 66/108); **fondo** = color sólido `#FFF8F3`.
-- En `app.json`: `android.adaptiveIcon.foregroundImage` (PNG 1024 exportado de `icon.svg`), `android.adaptiveIcon.backgroundColor: "#FFF8F3"`, `android.adaptiveIcon.monochromeImage` (versión monocroma).
-- Splash: fondo `#FFF8F3` (claro) / `#1A1412` (oscuro) con la marca centrada a 120 dp.
-- Ícono de notificación (`expo-notifications` → `icon`): versión monocroma blanca, `color: "#C2453A"`.
+Todo se genera con `pnpm -F @entre-nos/mobile assets` (`apps/mobile/scripts/generate-assets.mjs`):
+- `icon.png`: fondo + mascota, 1024 × 1024. También `docs/tienda/graficos/icono-512.png` para Play.
+- Ícono adaptativo de Android: **fondo** = `adaptive-icon-background.png` (degradado y confeti); **primer plano** = `adaptive-icon.png` (mascota dentro del círculo seguro de 66/108); `monochromeImage` = silueta.
+- Splash: la mascota a 200 dp sobre `#FFF7F2` (claro) / `#18141F` (oscuro).
+- Ícono de notificación: silueta blanca, `color: "#FF7F6B"`.
 
 ## 7. Ilustración, fotos y confeti
 

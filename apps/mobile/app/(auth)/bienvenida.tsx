@@ -102,7 +102,7 @@ export default function WelcomeScreen() {
       }
     >
       <View style={[styles.hero, { marginTop: theme.space.huge, gap: theme.space.xl }]}>
-        <BrandMark size={96} dark={theme.scheme === 'dark'} />
+        <BrandMark size={140} />
         <Text variant="title1">
           {pendingCode
             ? 'Entra para unirte al grupo'
