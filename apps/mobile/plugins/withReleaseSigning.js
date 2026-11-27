@@ -9,10 +9,14 @@ const { withAppBuildGradle } = require('expo/config-plugins');
 
 const MARK = '// entre-nos: upload signing';
 
+// A separate top-level android { } block, appended at the end of the file:
+// Gradle merges it with the template's, and it does not depend on where the
+// template's own blocks end.
 const SIGNING = `
-    ${MARK}
-    def uploadStore = System.getenv("ANDROID_UPLOAD_STORE_FILE")
-    if (uploadStore) {
+${MARK}
+def uploadStore = System.getenv("ANDROID_UPLOAD_STORE_FILE")
+if (uploadStore) {
+    android {
         signingConfigs {
             upload {
                 storeFile file(uploadStore)
@@ -21,18 +25,20 @@ const SIGNING = `
                 keyPassword System.getenv("ANDROID_UPLOAD_KEY_PASSWORD")
             }
         }
-        buildTypes.release.signingConfig signingConfigs.upload
+        buildTypes {
+            release {
+                signingConfig signingConfigs.upload
+            }
+        }
     }
+}
 `;
 
 module.exports = function withReleaseSigning(config) {
   return withAppBuildGradle(config, (cfg) => {
     const src = cfg.modResults.contents;
     if (src.includes(MARK)) return cfg;
-    // Append inside the android { } block, after buildTypes is declared.
-    const idx = src.lastIndexOf('\n}', src.indexOf('dependencies {'));
-    if (idx < 0) throw new Error('withReleaseSigning: android block not found in app/build.gradle');
-    cfg.modResults.contents = src.slice(0, idx) + '\n' + SIGNING + src.slice(idx);
+    cfg.modResults.contents = `${src.trimEnd()}\n${SIGNING}`;
     return cfg;
   });
 };
