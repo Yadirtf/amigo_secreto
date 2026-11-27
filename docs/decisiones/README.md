@@ -14,3 +14,4 @@ Formato: contexto → decisión → consecuencias. Una decisión por archivo, nu
 | 0008 | [Secretos y despliegue desde GitHub Actions](0008-secretos-y-despliegue.md) | Aceptada |
 | 0009 | [Fotos, retención y límites gratuitos](0009-datos-y-limites.md) | Aceptada |
 | 0010 | [Eliminación de cuenta](0010-eliminacion-cuenta.md) | Aceptada |
+| 0011 | [Identidad visual "Sobremesa"](0011-identidad-visual.md) | Aceptada |
