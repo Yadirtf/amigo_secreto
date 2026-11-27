@@ -24,7 +24,8 @@
 
 ## En curso
 - e2e en CI completo (flujos 01 a 04, modo oscuro, red lenta y sin conexión) en verde. La revisión UX de las capturas encontró y corrigió: viñetas sin texto en la bienvenida, chips apretados en la tarjeta de grupo y el chat vacío que se veía al revés en Android.
-- Primer despliegue de staging y spike de latencia con los secretos ya cargados. Staging y producción comparten el clúster de Atlas con bases separadas (ADR-0014).
+- Staging desplegado en https://entre-nos-api-staging.panter.workers.dev (prueba de humo OK). Staging y producción comparten el clúster de Atlas con bases separadas (ADR-0014).
+- Spike de latencia: ~1 s por petición si el Worker corre lejos de Atlas, 106 ms si corre a su lado. La API queda fijada en `us-east-1` (ADR-0013).
 
 ## Falta
 - Capturas de tienda (salen de la revisión UX).

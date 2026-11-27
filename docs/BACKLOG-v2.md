@@ -9,3 +9,4 @@
 7. Publicación en iOS (requiere Apple Developer) con "Iniciar sesión con Apple".
 8. Inicio de sesión con código por correo (requiere dominio propio y servicio de correo).
 9. Temas visuales y anuncio recompensado opcional para desbloquear un tema.
+10. **Conexión tibia a MongoDB con un Durable Object** (ADR-0013): baja cada petición de ~106 ms a ~25 ms junto a Atlas. Gratis; solo vale la pena si el tráfico crece.

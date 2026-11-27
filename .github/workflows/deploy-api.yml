@@ -79,7 +79,8 @@ jobs:
         if: steps.check.outputs.run == 'true'
         working-directory: apps/api
         run: |
-          if [ "$TARGET" = "production" ]; then ENVFLAG="--env production"; else ENVFLAG=""; fi
+          # "--env=" targets the top-level (staging) environment explicitly.
+          if [ "$TARGET" = "production" ]; then ENVFLAG="--env=production"; else ENVFLAG="--env="; fi
           echo "ENVFLAG=$ENVFLAG" >> "$GITHUB_ENV"
           npx wrangler deploy $ENVFLAG | tee deploy.log
           grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1 > url.txt

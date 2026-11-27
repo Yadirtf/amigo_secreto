@@ -8,6 +8,11 @@ workers_dev = true
 [triggers]
 crons = ["0 14 * * *"]
 
+# Run next to Atlas (AWS us-east-1), not next to the user: each request opens
+# a new MongoDB connection, which costs several round trips (ADR-0013).
+[placement]
+region = "aws:us-east-1"
+
 [vars]
 APP_ENV = "staging"
 # Database name: staging and production may share one Atlas cluster (ADR-0014).
@@ -24,6 +29,8 @@ ANDROID_CERT_FINGERPRINTS = ""
 name = "entre-nos-api"
 [env.production.triggers]
 crons = ["0 14 * * *"]
+[env.production.placement]
+region = "aws:us-east-1"
 [env.production.vars]
 APP_ENV = "production"
 MONGODB_DB = "entrenos"
