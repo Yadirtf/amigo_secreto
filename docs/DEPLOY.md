@@ -23,8 +23,8 @@ Todo corre en capas gratuitas. El despliegue de la API lo hace GitHub Actions; t
 |---|---|---|
 | `CLOUDFLARE_API_TOKEN` | Sí | Token del paso 2 |
 | `CLOUDFLARE_ACCOUNT_ID` | Sí | Account ID |
-| `MONGODB_URI_STAGING` | Sí | Cadena de staging |
-| `MONGODB_URI_PRODUCTION` | Sí | Cadena de producción |
+| `MONGODB_URI_PRODUCTION` | Sí | Cadena de conexión del clúster de Atlas |
+| `MONGODB_URI_STAGING` | Opcional | Solo si quieres staging en otro clúster. Si falta, staging usa el mismo clúster con la base `entrenos_staging` y producción usa `entrenos` (ADR-0014) |
 | `DEV_LOGIN_KEY_STAGING` | Para probar sin Google | Texto aleatorio de 32+ caracteres |
 | `GOOGLE_CLIENT_IDS` | Para Google Sign-In | Client IDs separados por coma (ver paso 5) |
 | `EXPO_ACCESS_TOKEN` | Opcional | Token de expo.dev (mejora límites de push) |

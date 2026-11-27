@@ -23,12 +23,11 @@
 - Material de tiendas en `docs/tienda/` (ficha de Play, seguridad de datos, clasificación de contenido) y política de privacidad publicada por la API en `/privacidad`.
 
 ## En curso
-- e2e en CI: el APK compila y corre en el emulador. La primera corrida destapó que Workers no reutiliza conexiones entre peticiones; corregido con un cliente por petición (ADR-0013). Luego, revisión UX pantalla por pantalla.
+- e2e en CI completo (flujos 01 a 04, modo oscuro, red lenta y sin conexión) en verde. La revisión UX de las capturas encontró y corrigió: viñetas sin texto en la bienvenida, chips apretados en la tarjeta de grupo y el chat vacío que se veía al revés en Android.
+- Primer despliegue de staging y spike de latencia con los secretos ya cargados. Staging y producción comparten el clúster de Atlas con bases separadas (ADR-0014).
 
 ## Falta
-- Pruebas de red lenta / sin conexión y medición de consumo de datos.
 - Capturas de tienda (salen de la revisión UX).
 
 ## Bloqueado / espera al dueño
-- Secretos en GitHub para el spike y los despliegues: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `MONGODB_URI_STAGING`, `MONGODB_URI_PRODUCTION`. Opcional: `CONTACT_EMAIL` (correo público en la política de privacidad).
 - 12 testers para la prueba cerrada de Google Play.

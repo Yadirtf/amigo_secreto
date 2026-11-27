@@ -42,7 +42,14 @@ jobs:
           MONGO_STAGING: ${{ secrets.MONGODB_URI_STAGING }}
           MONGO_PRODUCTION: ${{ secrets.MONGODB_URI_PRODUCTION }}
         run: |
-          if [ "$TARGET" = "production" ]; then URI="$MONGO_PRODUCTION"; else URI="$MONGO_STAGING"; fi
+          # Staging may reuse the production cluster: the database name keeps them apart
+          # (entrenos_staging vs entrenos, see ADR-0014 and wrangler.toml).
+          if [ "$TARGET" = "production" ]; then
+            URI="$MONGO_PRODUCTION"; DB=entrenos
+          else
+            URI="${MONGO_STAGING:-$MONGO_PRODUCTION}"; DB=entrenos_staging
+          fi
+          echo "MONGODB_DB=$DB" >> "$GITHUB_ENV"
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$URI" ]; then
             echo "::notice::Deploy skipped: missing Cloudflare or MongoDB secrets for $TARGET (see docs/DEPLOY.md)."
             echo "run=false" >> "$GITHUB_OUTPUT"
