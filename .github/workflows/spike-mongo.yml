@@ -57,7 +57,11 @@ jobs:
       - name: Measure (20 sequential requests per strategy)
         if: steps.check.outputs.run == 'true'
         run: |
-          sleep 5
+          # New secrets take a few seconds to reach every edge; wait until the key works.
+          for t in $(seq 1 12); do
+            curl -sf -o /dev/null -H "x-spike-key: $SPIKE_KEY" "$SPIKE_URL/region" && break
+            sleep 5
+          done
           echo "Atlas node: $(curl -s -H "x-spike-key: $SPIKE_KEY" "$SPIKE_URL/region" | jq -c '.region')" | tee -a "$GITHUB_STEP_SUMMARY"
           for P in / /do; do
             echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -67,6 +71,7 @@ jobs:
             : > "totals$( [ "$P" = / ] && echo a || echo b ).txt"
             for i in $(seq 1 20); do
               R=$(curl -s -H "x-spike-key: $SPIKE_KEY" "$SPIKE_URL$P")
+              echo "$R" | jq -e . >/dev/null 2>&1 || R='{"ok":false,"error":"non-JSON response"}'
               echo "$P $R"
               echo "$R" | jq -r '.ms.total // empty' >> "totals$( [ "$P" = / ] && echo a || echo b ).txt"
               echo "$R" | jq -r --arg i "$i" '"| \($i) | \(.ok) | \(.reused) | \(.ms.connect) | \(.ms.insert) | \(.ms.find) | \(.ms.delete) | \(.ms.total) | \(.colo) | \(.error // "")"' >> "$GITHUB_STEP_SUMMARY"

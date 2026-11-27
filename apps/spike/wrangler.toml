@@ -14,3 +14,8 @@ class_name = "MongoGateway"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["MongoGateway"]
+
+# Run next to Atlas (AWS us-east-1): the handshake costs many round trips, so
+# the Worker should sit beside the database, not beside the user (ADR-0013).
+[placement]
+region = "aws:us-east-1"
