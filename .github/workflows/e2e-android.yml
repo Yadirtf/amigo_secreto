@@ -32,7 +32,7 @@ jobs:
       DEV_LOGIN_KEY: e2e-dev-login-key-not-a-secret-0001
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version: 22
