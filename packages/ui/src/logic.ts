@@ -33,8 +33,8 @@ export function contrastRatio(a: string, b: string): number {
  * at ≥ 9.5:1 against the theme's textPrimary.
  */
 export const AVATAR_BACKGROUNDS: Record<ColorScheme, readonly string[]> = {
-  light: ['#FCE3DE', '#DDEFE9', '#F7E7C4', '#E6E0F5', '#DCEAF7', '#F1E4DC'],
-  dark: ['#4A2420', '#1D3A32', '#4A3A16', '#332B4A', '#1E3247', '#3A2E29'],
+  light: ['#FFE3DC', '#DDF5EC', '#FFF1C7', '#ECE5FF', '#DCEEFF', '#FFE4F1'],
+  dark: ['#4A2530', '#1C3A35', '#433718', '#352B52', '#1E3350', '#47243F'],
 };
 
 /** Deterministic, stable string hash (djb2). */

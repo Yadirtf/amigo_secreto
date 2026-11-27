@@ -50,7 +50,7 @@ export function Chip({
           borderColor: disabled
             ? theme.color.border
             : selected
-              ? theme.color.primary
+              ? theme.color.primaryText
               : theme.color.borderStrong,
           backgroundColor: selected
             ? theme.color.primarySoft

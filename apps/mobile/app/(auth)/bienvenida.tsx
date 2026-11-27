@@ -102,7 +102,7 @@ export default function WelcomeScreen() {
       }
     >
       <View style={[styles.hero, { marginTop: theme.space.huge, gap: theme.space.xl }]}>
-        <BrandMark size={96} dark={theme.scheme === 'dark'} />
+        <BrandMark size={140} />
         <Text variant="title1">
           {pendingCode
             ? 'Entra para unirte al grupo'
@@ -111,7 +111,7 @@ export default function WelcomeScreen() {
         <View style={[styles.stretch, { gap: theme.space.md }]}>
           {BULLETS.map((b) => (
             <View key={b} style={styles.bullet}>
-              <Icon name="success" color="secondary" />
+              <Icon name="success" color="secondaryText" />
               <Text variant="body" style={styles.flex}>
                 {b}
               </Text>
@@ -121,7 +121,7 @@ export default function WelcomeScreen() {
         {pendingCode ? (
           <Card testID="welcome-invite-card" style={styles.stretch}>
             <View style={styles.bullet}>
-              <Icon name="gift" color="primary" />
+              <Icon name="gift" color="primaryText" />
               <View style={styles.flex}>
                 <Text variant="bodyStrong">Te invitaron a un amigo secreto</Text>
                 <Text variant="caption" color="textSecondary">
@@ -158,7 +158,7 @@ function GoogleButton({ loading, onPress }: { loading: boolean; onPress: () => v
         },
       ]}
     >
-      <Text variant="title3" style={styles.g} color="primary">
+      <Text variant="title3" style={styles.g} color="primaryText">
         G
       </Text>
       <Text variant="button">{loading ? 'Entrando…' : 'Continuar con Google'}</Text>
@@ -181,7 +181,7 @@ function Legal() {
         accessibilityLabel="Términos"
         hitSlop={14}
       >
-        <Text variant="caption" color="primary" style={styles.underline}>
+        <Text variant="caption" color="primaryText" style={styles.underline}>
           Términos
         </Text>
       </Pressable>
@@ -194,7 +194,7 @@ function Legal() {
         accessibilityLabel="Política de privacidad"
         hitSlop={14}
       >
-        <Text variant="caption" color="primary" style={styles.underline}>
+        <Text variant="caption" color="primaryText" style={styles.underline}>
           Política de privacidad
         </Text>
       </Pressable>

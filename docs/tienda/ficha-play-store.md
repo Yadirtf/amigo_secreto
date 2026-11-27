@@ -6,7 +6,7 @@
 - **Categoría:** Estilo de vida (alternativa: Social)
 - **Etiquetas:** Navidad, regalos, grupos, familia
 - **Correo de contacto:** (el tuyo, obligatorio)
-- **Política de privacidad:** `https://<api-produccion>.workers.dev/privacidad`
+- **Política de privacidad:** `https://entre-nos-api.panter.workers.dev/privacidad`
 - **Precio:** Gratis. Sin anuncios. Sin compras dentro de la app en v1.
 
 ## Descripción corta (≤ 80)
@@ -41,15 +41,15 @@ Hecha en Colombia, liviana y pensada para gastar pocos datos. Funciona aunque la
 ## Recursos gráficos
 | Recurso | Tamaño | Fuente |
 |---|---|---|
-| Ícono | 512×512 PNG | `apps/mobile/assets/icon.png` (reexportar a 512) |
-| Gráfico de funciones | 1024×500 | Fondo crema `#FFF8F3`, logo + "Organiza tu amigo secreto sin papelitos" |
+| Ícono | 512×512 PNG | [graficos/icono-512.png](graficos/icono-512.png) |
+| Gráfico de funciones | 1024×500 | [graficos/grafico-funciones-1024x500.png](graficos/grafico-funciones-1024x500.png) |
 | Capturas de teléfono | 4–8, 1080×1920 o más | Mis grupos · Crear grupo · Detalle con invitación · "¿A quién te tocó?" · Lista de deseos · Chat anónimo · Revelación |
 
 Las capturas se toman del build de staging con datos de ejemplo (sin nombres reales).
 
 ## Prueba cerrada (obligatoria para cuentas personales)
 1. *Pruebas → Prueba cerrada → Crear pista* ("Testers").
-2. Sube el AAB (`eas build -p android --profile production`).
+2. Sube el AAB (workflow *Release Android*, ver [publicar-en-play-store.md](publicar-en-play-store.md)).
 3. Agrega a los **12 testers** (lista de correos de Gmail) y comparte el enlace de inscripción.
 4. Los 12 deben **instalar y mantener** la app 14 días seguidos. Pídeles que la abran varias veces (crear un grupo de prueba entre ellos sirve).
 5. Después de 14 días: *Solicitar acceso a producción* y responder el cuestionario.

@@ -27,6 +27,7 @@ import {
 import { SESSION_CLOSED_MESSAGE } from '../src/lib/errors';
 import { persistOptions, queryClient, wireQueryManagers } from '../src/query/client';
 import { restoreSecureCache, watchSecureCache } from '../src/query/secureCache';
+import { useAppearance, useAppearanceHydrated } from '../src/state/appearance';
 import { useSession } from '../src/state/session';
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -45,6 +46,8 @@ export default function RootLayout() {
     Nunito_800ExtraBold,
   });
   const status = useSession((s) => s.status);
+  const appearance = useAppearance((s) => s.mode);
+  const appearanceReady = useAppearanceHydrated();
   const [secureRestored, setSecureRestored] = useState(false);
 
   useEffect(() => {
@@ -56,7 +59,8 @@ export default function RootLayout() {
   }, []);
 
   // Never block the start on fonts: fall back to system fonts on error.
-  const ready = (fontsLoaded || !!fontError) && status !== 'loading' && secureRestored;
+  const ready =
+    (fontsLoaded || !!fontError) && status !== 'loading' && secureRestored && appearanceReady;
 
   useEffect(() => {
     if (ready) void SplashScreen.hideAsync().catch(() => undefined);
@@ -67,7 +71,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ThemeProvider>
+        <ThemeProvider preference={appearance}>
           <PersistQueryClientProvider
             client={queryClient}
             persistOptions={persistOptions}

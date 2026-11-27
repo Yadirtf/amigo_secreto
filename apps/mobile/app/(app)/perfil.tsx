@@ -15,7 +15,7 @@ import * as Application from 'expo-application';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
-import { PhotoSheet } from '../../src/components/sheets';
+import { PhotoSheet, ThemeSheet } from '../../src/components/sheets';
 import { goBack } from '../../src/components/states';
 import { config } from '../../src/config';
 import { deleteAccount, signOut } from '../../src/features/auth/session';
@@ -24,6 +24,7 @@ import { useUpdateMe } from '../../src/features/profile/hooks';
 import { errorCode, errorMessage } from '../../src/lib/errors';
 import { haptics } from '../../src/lib/haptics';
 import { openExternal } from '../../src/lib/share';
+import { APPEARANCE_LABEL, useAppearance } from '../../src/state/appearance';
 import { useSession } from '../../src/state/session';
 
 const NAME_MAX = 40;
@@ -39,6 +40,8 @@ export default function ProfileScreen() {
   const [name, setName] = useState(user?.name ?? '');
   const [nameError, setNameError] = useState<string | null>(null);
   const [photoOpen, setPhotoOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const appearance = useAppearance((s) => s.mode);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -160,7 +163,14 @@ export default function ProfileScreen() {
       </Text>
 
       <View>
-        <ListRow icon="settings" title="Tema" detail="Sigue la configuración de tu teléfono" />
+        <ListRow
+          icon="settings"
+          title="Tema"
+          detail={APPEARANCE_LABEL[appearance]}
+          chevron
+          onPress={() => setThemeOpen(true)}
+          testID="profile-theme"
+        />
         <ListRow
           icon="bell"
           title="Notificaciones"
@@ -176,7 +186,7 @@ export default function ProfileScreen() {
             onPress={() => void openExternal(config.privacyUrl)}
           />
         ) : null}
-        {config.termsUrl ? (
+        {config.termsUrl && config.termsUrl !== config.privacyUrl ? (
           <ListRow
             icon="info"
             title="Términos"
@@ -220,6 +230,7 @@ export default function ProfileScreen() {
         {`Versión ${version}`}
       </Text>
 
+      <ThemeSheet visible={themeOpen} onClose={() => setThemeOpen(false)} />
       <PhotoSheet
         visible={photoOpen}
         onClose={() => setPhotoOpen(false)}

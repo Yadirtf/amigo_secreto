@@ -19,3 +19,10 @@ appId: com.entrenos.amigosecreto
     visible:
       id: groups-screen
     timeout: 20000
+# The dark pass switches the app theme by hand: the phone being dark is not enough.
+- runFlow:
+    when:
+      true: ${THEME == 'dark'}
+    file: set-theme.yaml
+    env:
+      MODE: dark

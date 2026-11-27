@@ -82,7 +82,7 @@ function RevealFlow() {
         }
       >
         <Centered>
-          <Icon name="draw" size={48} color="primary" />
+          <Icon name="draw" size={48} color="primaryText" />
           <Text variant="title1" align="center" accessibilityRole="header">
             Hubo un nuevo sorteo. Tu amigo secreto cambió.
           </Text>
@@ -107,7 +107,7 @@ function RevealFlow() {
         }
       >
         <Centered>
-          <Icon name="eye" size={48} color="primary" />
+          <Icon name="eye" size={48} color="primaryText" />
           <Text variant="title1" align="center" accessibilityRole="header">
             Antes de abrir…
           </Text>
@@ -359,7 +359,7 @@ function ProgressFrame({ ringProps }: { ringProps: Partial<{ strokeDashoffset: n
         width={RING_W - STROKE}
         height={RING_H - STROKE}
         rx={theme.radius.xl + RING_PAD / 2}
-        stroke={theme.color.primary}
+        stroke={theme.color.primaryText}
         strokeWidth={STROKE}
         strokeDasharray={`${PERIMETER} ${PERIMETER}`}
         strokeLinecap="round"

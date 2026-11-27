@@ -106,8 +106,8 @@ export default function MyGroupsScreen() {
         <RefreshControl
           refreshing={refreshing || (isRefetching && refreshing)}
           onRefresh={() => void onRefresh()}
-          colors={[theme.color.primary]}
-          tintColor={theme.color.primary}
+          colors={[theme.color.primaryText]}
+          tintColor={theme.color.primaryText}
           progressBackgroundColor={theme.color.surface}
         />
       }

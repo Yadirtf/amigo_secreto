@@ -1,6 +1,7 @@
-import { BottomSheet, Button, ListRow, Text, useToast } from '@entre-nos/ui';
+import { BottomSheet, Button, CheckRow, ListRow, Text, useToast } from '@entre-nos/ui';
 import { Linking } from 'react-native';
 import { config } from '../config';
+import { APPEARANCE_LABEL, useAppearance, type AppearanceMode } from '../state/appearance';
 import {
   maybeOfferNotifications,
   requestPushPermission,
@@ -170,3 +171,38 @@ export function NotificationPromptSheet() {
 }
 
 export { maybeOfferNotifications };
+
+export interface ThemeSheetProps {
+  visible: boolean;
+  onClose: () => void;
+}
+
+const THEME_OPTIONS: { mode: AppearanceMode; detail?: string }[] = [
+  { mode: 'light' },
+  { mode: 'dark' },
+  { mode: 'system', detail: 'Cambia solo cuando tu teléfono cambie' },
+];
+
+/** Perfil → Tema: the user picks light or dark; the phone never decides alone. */
+export function ThemeSheet({ visible, onClose }: ThemeSheetProps) {
+  const mode = useAppearance((s) => s.mode);
+  const setMode = useAppearance((s) => s.setMode);
+  return (
+    <BottomSheet visible={visible} onClose={onClose} title="Tema" testID="theme-sheet">
+      {THEME_OPTIONS.map((o) => (
+        <CheckRow
+          key={o.mode}
+          kind="radio"
+          label={APPEARANCE_LABEL[o.mode]}
+          detail={o.detail}
+          checked={mode === o.mode}
+          onToggle={() => {
+            setMode(o.mode);
+            onClose();
+          }}
+          testID={`theme-${o.mode}`}
+        />
+      ))}
+    </BottomSheet>
+  );
+}

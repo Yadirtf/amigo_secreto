@@ -3,15 +3,19 @@
  * bundler, so they must be read with the full `process.env.EXPO_PUBLIC_X`
  * expression (no destructuring).
  */
+const apiUrl = (
+  process.env.EXPO_PUBLIC_API_URL ?? 'https://entre-nos-api-staging.workers.dev'
+).replace(/\/+$/, '');
+
+/** The API serves the privacy policy itself (docs/tienda/politica-privacidad.md). */
+const privacyUrl = process.env.EXPO_PUBLIC_PRIVACY_URL ?? `${apiUrl}/privacidad`;
+
 export const config = {
-  apiUrl: (process.env.EXPO_PUBLIC_API_URL ?? 'https://entre-nos-api-staging.workers.dev').replace(
-    /\/+$/,
-    '',
-  ),
+  apiUrl,
   appEnv: process.env.EXPO_PUBLIC_APP_ENV ?? 'development',
   googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
-  privacyUrl: process.env.EXPO_PUBLIC_PRIVACY_URL ?? '',
-  termsUrl: process.env.EXPO_PUBLIC_TERMS_URL ?? process.env.EXPO_PUBLIC_PRIVACY_URL ?? '',
+  privacyUrl,
+  termsUrl: process.env.EXPO_PUBLIC_TERMS_URL ?? privacyUrl,
   helpUrl: process.env.EXPO_PUBLIC_HELP_URL ?? '',
   playStoreUrl: 'https://play.google.com/store/apps/details?id=com.entrenos.amigosecreto',
 } as const;
