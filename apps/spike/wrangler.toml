@@ -4,3 +4,13 @@ main = "src/index.ts"
 compatibility_date = "2026-11-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
+
+# Strategy B (ADR-0013): a Durable Object that keeps the connection warm.
+# SQLite-backed classes are the ones available on the free plan.
+[[durable_objects.bindings]]
+name = "GATEWAY"
+class_name = "MongoGateway"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["MongoGateway"]

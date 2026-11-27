@@ -54,16 +54,26 @@ jobs:
           printf '%s' "$SPIKE_KEY" | npx wrangler secret put SPIKE_KEY
           URL=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1)
           echo "SPIKE_URL=$URL" >> "$GITHUB_ENV"
-      - name: Measure (20 sequential requests)
+      - name: Measure (20 sequential requests per strategy)
         if: steps.check.outputs.run == 'true'
         run: |
           sleep 5
-          echo "| # | ok | reused | connect | insert | find | delete | total | colo |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|---|---|---|---|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
-          for i in $(seq 1 20); do
-            R=$(curl -s -H "x-spike-key: $SPIKE_KEY" "$SPIKE_URL")
-            echo "$R"
-            echo "$R" | jq -r --arg i "$i" '"| \($i) | \(.ok) | \(.reusedClient) | \(.ms.connect) | \(.ms.insert) | \(.ms.find) | \(.ms.delete) | \(.ms.total) | \(.colo) | \(.error // "")"' >> "$GITHUB_STEP_SUMMARY"
+          echo "Atlas node: $(curl -s -H "x-spike-key: $SPIKE_KEY" "$SPIKE_URL/region" | jq -c '.region')" | tee -a "$GITHUB_STEP_SUMMARY"
+          for P in / /do; do
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Strategy at $P" >> "$GITHUB_STEP_SUMMARY"
+            echo "| # | ok | reused | connect | insert | find | delete | total | colo |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|---|---|---|---|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+            : > "totals$( [ "$P" = / ] && echo a || echo b ).txt"
+            for i in $(seq 1 20); do
+              R=$(curl -s -H "x-spike-key: $SPIKE_KEY" "$SPIKE_URL$P")
+              echo "$P $R"
+              echo "$R" | jq -r '.ms.total // empty' >> "totals$( [ "$P" = / ] && echo a || echo b ).txt"
+              echo "$R" | jq -r --arg i "$i" '"| \($i) | \(.ok) | \(.reused) | \(.ms.connect) | \(.ms.insert) | \(.ms.find) | \(.ms.delete) | \(.ms.total) | \(.colo) | \(.error // "")"' >> "$GITHUB_STEP_SUMMARY"
+            done
+          done
+          for f in totalsa.txt totalsb.txt; do
+            echo "SUMMARY $f p50=$(sort -n $f | awk '{a[NR]=$1} END {print a[int((NR+1)/2)]}') max=$(sort -n $f | tail -1) n=$(wc -l < $f)"
           done
       - name: Remove spike worker
         if: always() && steps.check.outputs.run == 'true'
