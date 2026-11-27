@@ -35,6 +35,35 @@ interface ToastApi {
 
 const ToastContext = createContext<ToastApi>({ show: () => undefined, hide: () => undefined });
 
+/**
+ * Modal windows (bottom sheets, dialogs) draw above the root view, so a toast
+ * rendered there would be hidden. Each open modal registers an outlet and the
+ * toast renders in the topmost one.
+ */
+interface OutletApi {
+  toast: ToastState | null;
+  hide: () => void;
+  bottomOffset: number;
+  top: number | null;
+  register: (id: number) => () => void;
+}
+
+const OutletContext = createContext<OutletApi | null>(null);
+
+let outletIds = 0;
+
+/** Renders the current toast inside a modal window while that modal is on top. */
+export function ToastOutlet({ bottomOffset = 24 }: { bottomOffset?: number }) {
+  const api = useContext(OutletContext);
+  const [id] = useState(() => ++outletIds);
+  const register = api?.register;
+  useEffect(() => register?.(id), [register, id]);
+  if (!api?.toast || api.top !== id) return null;
+  return (
+    <ToastView key={api.toast.id} toast={api.toast} onHide={api.hide} bottomOffset={bottomOffset} />
+  );
+}
+
 export function useToast(): ToastApi {
   return useContext(ToastContext);
 }
@@ -78,13 +107,26 @@ export function ToastProvider({
     [],
   );
 
+  const [outlets, setOutlets] = useState<number[]>([]);
+  const register = useCallback((id: number) => {
+    setOutlets((o) => [...o, id]);
+    return () => setOutlets((o) => o.filter((x) => x !== id));
+  }, []);
+  const top = outlets.length > 0 ? (outlets[outlets.length - 1] ?? null) : null;
+
   const api = useMemo(() => ({ show, hide }), [show, hide]);
+  const outletApi = useMemo(
+    () => ({ toast, hide, bottomOffset, top, register }),
+    [toast, hide, bottomOffset, top, register],
+  );
   return (
     <ToastContext.Provider value={api}>
-      {children}
-      {toast ? (
-        <ToastView key={toast.id} toast={toast} onHide={hide} bottomOffset={bottomOffset} />
-      ) : null}
+      <OutletContext.Provider value={outletApi}>
+        {children}
+        {toast && top === null ? (
+          <ToastView key={toast.id} toast={toast} onHide={hide} bottomOffset={bottomOffset} />
+        ) : null}
+      </OutletContext.Provider>
     </ToastContext.Provider>
   );
 }

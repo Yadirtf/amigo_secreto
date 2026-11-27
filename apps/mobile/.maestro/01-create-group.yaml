@@ -43,10 +43,15 @@ tags:
 - assertVisible: '$ 50.000 por regalo'
 - assertVisible:
     id: group-code
-# Fewer than 3 people: the draw button explains and opens the invite sheet.
+# Fewer than 3 people: the draw button opens the invite sheet and a toast,
+# drawn inside the sheet's window, explains why.
 - scrollUntilVisible:
     element:
       id: group-draw
 - tapOn:
     id: group-draw
+- extendedWaitUntil:
+    visible:
+      id: invite-sheet
+    timeout: 5000
 - assertVisible: 'Necesitan al menos 3 personas.*'

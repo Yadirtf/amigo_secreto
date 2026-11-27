@@ -27,6 +27,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from '../theme';
 import { IconButton } from './IconButton';
 import { Text, type TextRef } from './Text';
+import { ToastOutlet } from './Toast';
 
 export interface BottomSheetProps {
   visible: boolean;
@@ -208,6 +209,7 @@ export function BottomSheet({
               </Animated.View>
             </View>
           </KeyboardAvoidingView>
+          <ToastOutlet />
         </GestureHandlerRootView>
       </ThemeProvider>
     </Modal>

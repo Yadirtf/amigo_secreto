@@ -3,6 +3,7 @@ import { AccessibilityInfo, Modal, StyleSheet, View } from 'react-native';
 import { useTheme } from '../theme';
 import { Button, type ButtonVariant } from './Button';
 import { Text, type TextRef } from './Text';
+import { ToastOutlet } from './Toast';
 
 export interface ConfirmDialogProps {
   visible: boolean;
@@ -100,6 +101,7 @@ export function ConfirmDialog({
           </View>
         </View>
       </View>
+      <ToastOutlet />
     </Modal>
   );
 }
