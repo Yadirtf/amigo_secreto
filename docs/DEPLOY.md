@@ -28,6 +28,7 @@ Todo corre en capas gratuitas. El despliegue de la API lo hace GitHub Actions; t
 | `DEV_LOGIN_KEY_STAGING` | Para probar sin Google | Texto aleatorio de 32+ caracteres |
 | `GOOGLE_CLIENT_IDS` | Para Google Sign-In | Client IDs separados por coma (ver paso 5) |
 | `EXPO_ACCESS_TOKEN` | Opcional | Token de expo.dev (mejora límites de push) |
+| `CONTACT_EMAIL` | Recomendado para producción | Correo público de contacto que aparece en `/privacidad` (Play lo exige) |
 | `EXPO_TOKEN` | Para builds en CI | Token de expo.dev |
 
 `JWT_SECRET` y `ASSIGNMENT_KEY` **no** se crean a mano: el workflow los genera una sola vez y los guarda en Cloudflare.

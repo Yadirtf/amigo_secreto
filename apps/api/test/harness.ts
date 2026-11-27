@@ -32,6 +32,7 @@ export function harness(
       androidPackage: 'com.entrenos.amigosecreto',
       playStoreUrl: 'https://play.google.com/store/apps/details?id=com.entrenos.amigosecreto',
       certFingerprints: ['AA:BB'],
+      contactEmail: 'contacto@example.com',
     },
   };
   const app = createApp(() => container);

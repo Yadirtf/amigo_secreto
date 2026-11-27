@@ -38,6 +38,7 @@ import type { GoogleVerifier, TokenService } from '../infra/auth.js';
 import type { PushTokenStore, RateLimiter } from '../infra/platform.js';
 import { HttpError, toErrorResponse } from './errors.js';
 import { landingPage, assetLinks } from './landing.js';
+import { privacyPage } from './privacy.js';
 import { openApiDocument } from './openapi.js';
 import { drainBackground } from '../infra/background.js';
 
@@ -47,6 +48,8 @@ export interface AppConfig {
   androidPackage: string;
   playStoreUrl: string;
   certFingerprints: string[];
+  /** Public contact shown in the privacy policy; null hides it. */
+  contactEmail: string | null;
 }
 
 export interface Container {
@@ -172,6 +175,16 @@ export function createApp(getContainer: (c: Context) => Promise<Container> | Con
       "default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'",
     );
     return c.html(landingPage(c.req.param('code'), config.playStoreUrl, config.androidPackage));
+  });
+
+  app.get('/privacidad', (c) => {
+    const { config } = c.get('container');
+    c.header('Cache-Control', 'public, max-age=3600');
+    c.header(
+      'Content-Security-Policy',
+      "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'",
+    );
+    return c.html(privacyPage(config.contactEmail));
   });
 
   const v1 = new Hono<Env>();

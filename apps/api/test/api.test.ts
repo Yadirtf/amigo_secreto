@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { POLICY_MARKDOWN } from '../src/http/privacy.js';
 import { harness } from './harness.js';
 
 const futureDay = () => {
@@ -382,6 +384,20 @@ describe('public pages', () => {
     expect(r.headers.get('content-security-policy')).toContain("default-src 'none'");
     const x = await h.call('GET', '/i/%3Cscript%3Ealert(1)%3C%2Fscript%3E');
     expect(x.text).not.toContain('<script>');
+  });
+  it('serves the privacy policy, in sync with docs/tienda', async () => {
+    const h = harness();
+    const r = await h.call('GET', '/privacidad');
+    expect(r.status).toBe(200);
+    expect(r.text).toContain('<h1>Política de privacidad — Entre Nos</h1>');
+    expect(r.text).toContain('contacto@example.com');
+    expect(r.text).not.toContain('[tu correo]');
+    expect(r.headers.get('content-security-policy')).toContain("default-src 'none'");
+    const doc = readFileSync(
+      new URL('../../../docs/tienda/politica-privacidad.md', import.meta.url),
+      'utf8',
+    );
+    expect(POLICY_MARKDOWN).toBe(doc);
   });
   it('serves assetlinks, health and openapi', async () => {
     const h = harness();

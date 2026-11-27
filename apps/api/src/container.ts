@@ -26,6 +26,8 @@ export interface WorkerEnv {
   ANDROID_PACKAGE: string;
   PLAY_STORE_URL: string;
   ANDROID_CERT_FINGERPRINTS: string;
+  /** Optional public contact for the privacy policy page. */
+  CONTACT_EMAIL?: string;
   /** Optional: free tier "max members" switch, empty = unlimited (ADR-0005). */
   MAX_MEMBERS_FREE?: string;
 }
@@ -55,6 +57,7 @@ export function containerFromEnv(env: WorkerEnv): Promise<Container> {
       androidPackage: env.ANDROID_PACKAGE,
       playStoreUrl: env.PLAY_STORE_URL,
       certFingerprints: split(env.ANDROID_CERT_FINGERPRINTS),
+      contactEmail: env.CONTACT_EMAIL?.trim() || null,
     };
     return {
       deps: {

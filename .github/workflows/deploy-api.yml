@@ -84,6 +84,7 @@ jobs:
           GOOGLE_CLIENT_IDS: ${{ secrets.GOOGLE_CLIENT_IDS }}
           EXPO_ACCESS_TOKEN: ${{ secrets.EXPO_ACCESS_TOKEN }}
           DEV_LOGIN_KEY: ${{ secrets.DEV_LOGIN_KEY_STAGING }}
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
         run: |
           EXISTING=$(npx wrangler secret list $ENVFLAG --format json 2>/dev/null | jq -r '.[].name' || true)
           put() { printf '%s' "$2" | npx wrangler secret put "$1" $ENVFLAG >/dev/null && echo "set $1"; }
@@ -94,6 +95,7 @@ jobs:
           echo "$EXISTING" | grep -qx ASSIGNMENT_KEY || put ASSIGNMENT_KEY "$(openssl rand -base64 32)"
           [ -n "$GOOGLE_CLIENT_IDS" ] && put GOOGLE_CLIENT_IDS "$GOOGLE_CLIENT_IDS"
           [ -n "$EXPO_ACCESS_TOKEN" ] && put EXPO_ACCESS_TOKEN "$EXPO_ACCESS_TOKEN"
+          [ -n "$CONTACT_EMAIL" ] && put CONTACT_EMAIL "$CONTACT_EMAIL"
           if [ "$TARGET" = "staging" ] && [ -n "$DEV_LOGIN_KEY" ]; then put DEV_LOGIN_KEY "$DEV_LOGIN_KEY"; fi
           true
       - name: Smoke test
