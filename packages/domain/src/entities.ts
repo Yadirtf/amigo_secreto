@@ -27,7 +27,7 @@ export interface Member {
 }
 
 /** An exclusion is symmetric: neither person may give to the other. */
-export type Exclusion = readonly [UserId, UserId];
+export type Exclusion = [UserId, UserId];
 
 export interface Group {
   id: GroupId;

@@ -27,6 +27,10 @@ export default tseslint.config(
     },
   },
   {
+    files: ['**/scripts/**/*.mjs'],
+    languageOptions: { globals: { process: 'readonly', console: 'readonly' } },
+  },
+  {
     // Clean architecture: the domain must not import frameworks or infrastructure.
     files: ['packages/domain/src/**/*.ts'],
     rules: {

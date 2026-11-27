@@ -1,0 +1,29 @@
+# Entre Nos API — Cloudflare Worker (ADR-0001, ADR-0008)
+name = "entre-nos-api-staging"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+# 9:00 a. m. Bogotá = 14:00 UTC: countdowns, auto reveal and retention purge.
+[triggers]
+crons = ["0 14 * * *"]
+
+[vars]
+APP_ENV = "staging"
+ANDROID_PACKAGE = "com.entrenos.amigosecreto"
+PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.entrenos.amigosecreto"
+# Comma-separated SHA-256 fingerprints of the app signing certificates (App Links).
+ANDROID_CERT_FINGERPRINTS = ""
+
+# Secrets (wrangler secret put): MONGODB_URI, JWT_SECRET, ASSIGNMENT_KEY,
+# GOOGLE_CLIENT_IDS, EXPO_ACCESS_TOKEN (optional), DEV_LOGIN_KEY (staging only)
+
+[env.production]
+name = "entre-nos-api"
+[env.production.triggers]
+crons = ["0 14 * * *"]
+[env.production.vars]
+APP_ENV = "production"
+ANDROID_PACKAGE = "com.entrenos.amigosecreto"
+PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.entrenos.amigosecreto"
+ANDROID_CERT_FINGERPRINTS = ""
