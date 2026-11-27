@@ -97,12 +97,54 @@ jobs:
           if [ "$TARGET" = "staging" ] && [ -n "$DEV_LOGIN_KEY" ]; then put DEV_LOGIN_KEY "$DEV_LOGIN_KEY"; fi
           true
       - name: Smoke test
+        id: smoke
         if: steps.check.outputs.run == 'true'
         working-directory: apps/api
         run: |
           URL=$(cat url.txt)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
           sleep 5
           curl -fsS "$URL/health"
           CODE=$(curl -s -o /dev/null -w '%{http_code}' "$URL/v1/me")
           test "$CODE" = "401"
           echo "Smoke test OK ($URL)" >> "$GITHUB_STEP_SUMMARY"
+    outputs:
+      url: ${{ steps.smoke.outputs.url }}
+
+  preview-apk:
+    name: Preview APK (staging)
+    needs: deploy
+    if: needs.deploy.outputs.url != '' && (github.event.inputs.environment || 'staging') == 'staging'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Build APK against staging
+        working-directory: apps/mobile
+        env:
+          EXPO_PUBLIC_API_URL: ${{ needs.deploy.outputs.url }}
+          EXPO_PUBLIC_APP_ENV: staging
+          EXPO_PUBLIC_DEV_LOGIN: ${{ secrets.DEV_LOGIN_KEY_STAGING != '' && '1' || '0' }}
+          EXPO_PUBLIC_DEV_LOGIN_KEY: ${{ secrets.DEV_LOGIN_KEY_STAGING }}
+          EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+          NODE_ENV: production
+        run: |
+          npx expo prebuild -p android --no-install --clean
+          cd android && ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+      - uses: actions/upload-artifact@v4
+        with:
+          name: entre-nos-staging-apk
+          path: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
+      - run: du -h apps/mobile/android/app/build/outputs/apk/release/app-release.apk >> "$GITHUB_STEP_SUMMARY"

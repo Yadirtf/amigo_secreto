@@ -108,7 +108,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           enableMinifyInReleaseBuilds: true,
           enableShrinkResourcesInReleaseBuilds: true,
           enableBundleCompression: true,
-          usesCleartextTraffic: false,
+          // Only the CI e2e build talks to a local http API (10.0.2.2).
+          usesCleartextTraffic: process.env.E2E_CLEARTEXT === '1',
           manifestQueries: {
             package: ['com.whatsapp', 'com.whatsapp.w4b'],
             intent: [{ action: 'VIEW', data: { scheme: 'whatsapp' } }],

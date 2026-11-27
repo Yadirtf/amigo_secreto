@@ -18,8 +18,11 @@
 
 - Red team ronda 2 (`docs/seguridad/informe-pentest.md`): 2 altos y 4 medios encontrados; **todos los altos corregidos**, 0 críticos/altos abiertos. 30 tests de regresión de seguridad en CI.
 
+- App móvil Expo (`apps/mobile`) y sistema de diseño (`packages/ui`): todas las pantallas v1, deep links `/i/<código>`, push, caché offline (7 días), UI optimista, bloqueo de capturas en pantallas secretas. 108 tests de app + UI. Bundle Android de 5,5 MB.
+- Workflow e2e Android con Maestro en emulador (API local + MongoDB) y APK de prueba que se genera tras cada despliegue a staging.
+
 ## En curso
-- App móvil Expo (pantallas v1, sistema de diseño).
+- Primera corrida de los e2e en CI y revisión UX pantalla por pantalla.
 
 ## Falta
 - App móvil, push, deep links, caché offline.

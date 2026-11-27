@@ -1,0 +1,113 @@
+name: E2E Android (Maestro)
+
+# Builds a release APK pointing to a local API (wrangler dev + MongoDB) and runs
+# the Maestro flows on an Android emulator. Slow (~25 min): runs on main, on
+# demand and nightly, not on every PR.
+on:
+  push:
+    branches: [main]
+    paths: ['apps/mobile/**', 'packages/**', 'apps/api/**', '.github/workflows/e2e-android.yml']
+  pull_request:
+    paths: ['apps/mobile/**', 'packages/ui/**', '.github/workflows/e2e-android.yml']
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-android
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      mongo:
+        image: mongo:8
+        ports: ['27017:27017']
+    env:
+      DEV_LOGIN_KEY: e2e-dev-login-key-not-a-secret-0001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: pnpm install --frozen-lockfile
+
+      - name: Start local API (wrangler dev → MongoDB service)
+        working-directory: apps/api
+        run: |
+          cat > .dev.vars <<VARS
+          APP_ENV=staging
+          MONGODB_URI=mongodb://127.0.0.1:27017/entrenos_e2e
+          JWT_SECRET=$(openssl rand -base64 48)
+          ASSIGNMENT_KEY=$(openssl rand -base64 32)
+          GOOGLE_CLIENT_IDS=none
+          DEV_LOGIN_KEY=$DEV_LOGIN_KEY
+          VARS
+          MONGODB_URI=mongodb://127.0.0.1:27017/entrenos_e2e node scripts/ensure-indexes.mjs
+          nohup npx wrangler dev --ip 0.0.0.0 --port 8787 > ../../wrangler.log 2>&1 &
+          for i in $(seq 1 60); do curl -fs http://127.0.0.1:8787/health && break; sleep 2; done
+          # Local spike: driver connects from workerd to MongoDB.
+          curl -s -X POST http://127.0.0.1:8787/v1/auth/dev -H 'content-type: application/json' \
+            -d "{\"key\":\"$DEV_LOGIN_KEY\",\"name\":\"Probe\"}" | head -c 200; echo
+
+      - name: Build release APK (e2e)
+        working-directory: apps/mobile
+        env:
+          EXPO_PUBLIC_API_URL: http://10.0.2.2:8787
+          EXPO_PUBLIC_APP_ENV: staging
+          EXPO_PUBLIC_DEV_LOGIN: '1'
+          EXPO_PUBLIC_DEV_LOGIN_KEY: ${{ env.DEV_LOGIN_KEY }}
+          E2E_CLEARTEXT: '1'
+          NODE_ENV: production
+        run: |
+          npx expo prebuild -p android --no-install --clean
+          cd android && ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=x86_64
+          ls -la app/build/outputs/apk/release/
+
+      - name: APK size
+        run: du -h apps/mobile/android/app/build/outputs/apk/release/*.apk | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+
+      - name: Run Maestro on emulator (API 34, low-end profile)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_4a
+          ram-size: 2048M
+          disable-animations: true
+          script: |
+            adb install -r apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+            maestro test apps/mobile/.maestro --format junit --output maestro-report.xml --debug-output maestro-debug
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-android-${{ github.run_id }}
+          path: |
+            maestro-report.xml
+            maestro-debug
+            wrangler.log
+          retention-days: 7
