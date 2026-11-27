@@ -45,6 +45,13 @@ describe('text validation', () => {
     expect(cleanMultiline(' hola\r\n\n\n\n¿qué   talla? ', 't', 1, 50)).toBe('hola\n\n¿qué talla?');
     expect(() => cleanMultiline('', 't', 1, 50)).toThrow(DomainError);
   });
+  it('rejects control and bidi characters but keeps emoji joiners (PT-06)', () => {
+    expect(() => cleanText('Tu amigo secreto\u202e', 'name', 1, 40)).toThrow(DomainError);
+    expect(() => cleanText('a\u0000b', 'name', 1, 40)).toThrow(DomainError);
+    expect(() => cleanMultiline('hola\u2066', 't', 1, 40)).toThrow(DomainError);
+    expect(cleanText('Familia 👨\u200d👩\u200d👧', 'name', 1, 40)).toContain('\u200d');
+    expect(cleanMultiline('línea 1\nlínea 2\tok', 't', 1, 40)).toContain('\n');
+  });
   it('isDomainError', () => {
     expect(isDomainError(new DomainError('NOT_FOUND', 'x'))).toBe(true);
     expect(isDomainError(new Error('x'))).toBe(false);

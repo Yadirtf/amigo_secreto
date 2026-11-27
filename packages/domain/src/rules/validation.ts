@@ -13,11 +13,23 @@ export const LIMITS = {
   messageText: { min: 1, max: 500 },
   reportReason: 200,
   exclusions: 200,
+  exclusionsPerPerson: 4,
 } as const;
+
+/**
+ * Control characters and bidi overrides are rejected (PT-06): they allow
+ * spoofing names like "Tu amigo secreto". Zero-width joiners stay (emoji).
+ */
+const FORBIDDEN_CHARS =
+  // eslint-disable-next-line no-control-regex -- intentionally matching control characters
+  /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
 
 const collapse = (s: string): string => s.replace(/\s+/g, ' ').trim();
 
 export function cleanText(value: string, field: string, min: number, max: number): string {
+  if (FORBIDDEN_CHARS.test(value)) {
+    throw new DomainError('INVALID_INPUT', `${field} has invalid characters`, { field });
+  }
   const v = collapse(value);
   if (v.length < min || v.length > max) {
     throw new DomainError('INVALID_INPUT', `${field} must be ${min}-${max} characters`, { field });
@@ -27,6 +39,9 @@ export function cleanText(value: string, field: string, min: number, max: number
 
 /** Multi-line text (chat): keeps newlines, trims, limits consecutive blank lines. */
 export function cleanMultiline(value: string, field: string, min: number, max: number): string {
+  if (FORBIDDEN_CHARS.test(value.replace(/[\t\n\r]/g, ''))) {
+    throw new DomainError('INVALID_INPUT', `${field} has invalid characters`, { field });
+  }
   const v = value
     .replace(/\r\n?/g, '\n')
     .replace(/[^\S\n]+/g, ' ')

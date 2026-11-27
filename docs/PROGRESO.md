@@ -16,6 +16,8 @@
 - API Hono sobre Workers: todos los endpoints de `docs/API.md`, Google Sign-In, JWT de 15 min con refresh rotativo, rate limiting en MongoDB, asignaciones cifradas en reposo, landing de invitación, App Links, OpenAPI en `/v1/openapi.json`, cron diario (cuenta regresiva, revelación automática, purga). 20 tests de API (incluye IDOR en cada endpoint) + tests de integración con MongoDB real en CI.
 - Workflow de despliegue (`deploy-api.yml`) y guía `docs/DEPLOY.md`.
 
+- Red team ronda 2 (`docs/seguridad/informe-pentest.md`): 2 altos y 4 medios encontrados; **todos los altos corregidos**, 0 críticos/altos abiertos. 30 tests de regresión de seguridad en CI.
+
 ## En curso
 - App móvil Expo (pantallas v1, sistema de diseño).
 

@@ -30,7 +30,7 @@ await Promise.all([
   idx('messages', { groupId: 1 }),
   idx('wishlists', { groupId: 1 }),
   idx('sessions', { currentHash: 1 }, { unique: true }),
-  idx('sessions', { previousHash: 1 }),
+  idx('sessions', { usedHashes: 1 }),
   idx('sessions', { userId: 1 }),
   idx('sessions', { expiresAt: 1 }, { expireAfterSeconds: 0 }),
   idx('push_tokens', { userId: 1 }),

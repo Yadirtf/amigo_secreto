@@ -187,3 +187,95 @@ export function isValidDraw(
   }
   return true;
 }
+
+/**
+ * "Real" freedom of a draw (threat model PT-02). An allowed pair g→r is only
+ * meaningful if it appears in at least one valid draw. Using a perfect
+ * matching M, a non-matching edge g→r belongs to some perfect matching iff g
+ * and r lie in the same strongly connected component of the graph with
+ * matching edges oriented giver→receiver and the rest receiver→giver
+ * (Dulmage–Mendelsohn). Returns, per giver and per receiver, how many
+ * partners are really possible.
+ */
+export function realOptions(
+  participants: readonly UserId[],
+  exclusions: readonly Exclusion[],
+): { feasible: boolean; asGiver: Map<UserId, number>; asReceiver: Map<UserId, number> } {
+  const people = [...new Set(participants)];
+  const allowed = allowedRecipients(people, exclusions);
+  // Deterministic matching (randomness irrelevant for the structure).
+  const firstIndex: RandomSource = { int: () => 0 };
+  const matching = randomizedMatching(people, allowed, firstIndex);
+  const asGiver = new Map<UserId, number>(people.map((p) => [p, 0]));
+  const asReceiver = new Map<UserId, number>(people.map((p) => [p, 0]));
+  if (matching.size !== people.length) return { feasible: false, asGiver, asReceiver };
+
+  // Nodes: "g:<id>" and "r:<id>".
+  const adj = new Map<string, string[]>();
+  const add = (a: string, b: string) => (adj.get(a) ?? adj.set(a, []).get(a))?.push(b);
+  for (const g of people) {
+    for (const r of allowed.get(g) ?? []) {
+      if (matching.get(g) === r) add(`g:${g}`, `r:${r}`);
+      else add(`r:${r}`, `g:${g}`);
+    }
+  }
+  // Tarjan's SCC (iterative to avoid deep recursion).
+  const index = new Map<string, number>();
+  const low = new Map<string, number>();
+  const onStack = new Set<string>();
+  const stack: string[] = [];
+  const comp = new Map<string, number>();
+  let counter = 0;
+  let compId = 0;
+  const nodes = people.flatMap((p) => [`g:${p}`, `r:${p}`]);
+  for (const start of nodes) {
+    if (index.has(start)) continue;
+    const work: [string, number][] = [[start, 0]];
+    index.set(start, counter);
+    low.set(start, counter++);
+    stack.push(start);
+    onStack.add(start);
+    while (work.length > 0) {
+      const top = work[work.length - 1] as [string, number];
+      const [v, i] = top;
+      const edges = adj.get(v) ?? [];
+      if (i < edges.length) {
+        top[1]++;
+        const w = edges[i] as string;
+        if (!index.has(w)) {
+          index.set(w, counter);
+          low.set(w, counter++);
+          stack.push(w);
+          onStack.add(w);
+          work.push([w, 0]);
+        } else if (onStack.has(w)) {
+          low.set(v, Math.min(low.get(v) as number, index.get(w) as number));
+        }
+      } else {
+        work.pop();
+        const parent = work[work.length - 1];
+        if (parent)
+          low.set(parent[0], Math.min(low.get(parent[0]) as number, low.get(v) as number));
+        if (low.get(v) === index.get(v)) {
+          let w: string;
+          do {
+            w = stack.pop() as string;
+            onStack.delete(w);
+            comp.set(w, compId);
+          } while (w !== v);
+          compId++;
+        }
+      }
+    }
+  }
+  for (const g of people) {
+    for (const r of allowed.get(g) ?? []) {
+      const usable = matching.get(g) === r || comp.get(`g:${g}`) === comp.get(`r:${r}`);
+      if (usable) {
+        asGiver.set(g, (asGiver.get(g) as number) + 1);
+        asReceiver.set(r, (asReceiver.get(r) as number) + 1);
+      }
+    }
+  }
+  return { feasible: true, asGiver, asReceiver };
+}

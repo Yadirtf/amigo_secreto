@@ -13,3 +13,6 @@ Google Sign-In exige crear clientes OAuth con la huella SHA-1 del certificado de
 ## Consecuencias
 - La llave queda dentro del APK de prueba; por eso solo sirve contra staging, cuyos datos son de prueba.
 - Los e2e de Maestro corren contra una API local en CI con su propia llave.
+
+## Revisión del red team (PT-07)
+Riesgo aceptado: cualquiera con el APK de prueba puede entrar a staging como cualquier nombre de prueba. Mitigación: staging no tiene datos reales y la prueba cerrada de Google Play usa el build de producción con Google.

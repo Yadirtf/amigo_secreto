@@ -36,7 +36,22 @@ describe('runDraw', () => {
     ]);
     await expect(runDraw(deps, org, groupId)).rejects.toMatchObject({
       code: 'DRAW_IMPOSSIBLE',
-      details: { blocking: [org] },
+      details: { blocking: expect.arrayContaining([org]) },
+    });
+  });
+  it('rejects exclusions that force a pair even if everyone keeps 2 nominal options (PT-02)', async () => {
+    const { deps, org, groupId, members } = await groupWith(5);
+    const [t, a, b] = members as [string, string, string];
+    await setExclusions(deps, org, groupId, [
+      [org, a],
+      [org, b],
+      [t, a],
+      [t, b],
+      [a, b],
+    ]);
+    await expect(runDraw(deps, org, groupId)).rejects.toMatchObject({
+      code: 'DRAW_IMPOSSIBLE',
+      details: { blocking: expect.arrayContaining([org, t]) },
     });
   });
   it('needs 3 participants', async () => {
@@ -82,7 +97,10 @@ describe('getMyAssignment', () => {
     expect(view.wishlist[0]).toMatchObject({ text: 'Medias', size: 'M' });
     expect(JSON.stringify(view)).not.toContain('giverId');
     const g = await getGroup(deps, members[0] as string, groupId);
-    expect(g.members.find((m) => m.id === org)?.hasSeenAssignment).toBe(true);
+    // Stored internally but never exposed to other members (PT-01).
+    expect(JSON.stringify(g)).not.toContain('hasSeenAssignment');
+    const stored = await deps.groups.findById(groupId);
+    expect(stored?.members.find((m) => m.userId === org)?.hasSeenAssignment).toBe(true);
     // Second call does not write again.
     const before = (await deps.groups.findById(groupId))?.version;
     await getMyAssignment(deps, org, groupId);

@@ -121,6 +121,8 @@ export interface Policy {
   /** null = unlimited. */
   maxMembersFree: number | null;
   maxMembersPremium: number;
+  /** Absolute cap per group regardless of plan. */
+  maxMembersHard: number;
   maxRedraws: number;
   inviteTtlDays: number;
   retentionDays: number;
@@ -129,6 +131,7 @@ export interface Policy {
 export const defaultPolicy: Policy = {
   maxMembersFree: null,
   maxMembersPremium: 100,
+  maxMembersHard: 100,
   maxRedraws: 2,
   inviteTtlDays: 60,
   retentionDays: 60,
