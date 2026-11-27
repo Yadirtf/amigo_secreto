@@ -25,8 +25,9 @@ Todo corre en capas gratuitas. El despliegue de la API lo hace GitHub Actions; t
 | `CLOUDFLARE_ACCOUNT_ID` | Sí | Account ID |
 | `MONGODB_URI_PRODUCTION` | Sí | Cadena de conexión del clúster de Atlas |
 | `MONGODB_URI_STAGING` | Opcional | Solo si quieres staging en otro clúster. Si falta, staging usa el mismo clúster con la base `entrenos_staging` y producción usa `entrenos` (ADR-0014) |
-| `DEV_LOGIN_KEY_STAGING` | Para probar sin Google | Texto aleatorio de 32+ caracteres |
+| `DEV_LOGIN_KEY_STAGING` | Para probar sin Google | Texto aleatorio de 32+ caracteres. En PowerShell: `-join ((48..57)+(65..90)+(97..122) \| Get-Random -Count 40 \| % {[char]$_})` |
 | `GOOGLE_CLIENT_IDS` | Para Google Sign-In | Client IDs separados por coma (ver paso 5) |
+| `GOOGLE_WEB_CLIENT_ID` | Para Google Sign-In | El client ID **Web** (lo usa el APK de prueba; ver paso 5) |
 | `EXPO_ACCESS_TOKEN` | Opcional | Token de expo.dev (mejora límites de push) |
 | `CONTACT_EMAIL` | Recomendado para producción | Correo público de contacto que aparece en `/privacidad` (Play lo exige) |
 | `EXPO_TOKEN` | Para builds en CI | Token de expo.dev |
@@ -42,7 +43,9 @@ Todo corre en capas gratuitas. El despliegue de la API lo hace GitHub Actions; t
 1. Crea un proyecto y la *pantalla de consentimiento OAuth* (externa, nombre "Entre Nos").
 2. Crea un cliente OAuth tipo **Web** (su ID va en la app como `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`).
 3. Crea un cliente tipo **Android** con paquete `com.entrenos.amigosecreto` y la **SHA-1** del certificado (EAS: `eas credentials`; Play: *Integridad de la app → certificado de firma*). Crea uno por cada certificado (debug/EAS y Play).
-4. Pon en `GOOGLE_CLIENT_IDS` el client ID **Web** (es el `aud` del token que verifica la API).
+   - El APK de prueba que compila *Deploy API* se firma con la llave de depuración de la plantilla de Expo. Su SHA-1 es `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`.
+4. Pon el client ID **Web** en `GOOGLE_CLIENT_IDS` (es el `aud` del token que verifica la API) y en `GOOGLE_WEB_CLIENT_ID` (lo usa la app).
+5. Mientras la pantalla de consentimiento esté en modo *Prueba*, solo entran los correos agregados como **usuarios de prueba**.
 
 ## 6. App Links (abrir la app desde el enlace de invitación)
 En `apps/api/wrangler.toml` pon en `ANDROID_CERT_FINGERPRINTS` las huellas **SHA-256** de los certificados (EAS y Play App Signing), separadas por coma, y despliega. La API sirve `/.well-known/assetlinks.json`.
