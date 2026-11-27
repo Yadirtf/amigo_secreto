@@ -218,7 +218,7 @@ export function ChatView({
             accessibilityLabel="Enviar mensaje"
             onPress={submit}
             disabled={draft.trim() === ''}
-            color="primary"
+            color="primaryText"
             testID="chat-send"
           />
         </View>

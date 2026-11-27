@@ -36,8 +36,8 @@ export function WishCard({ wish, onMore, testID }: WishCardProps) {
                   hitSlop={12}
                   style={[styles.row, { gap: theme.space.xs }]}
                 >
-                  <Icon name="link" size={16} color="primary" />
-                  <Text variant="caption" color="primary">
+                  <Icon name="link" size={16} color="primaryText" />
+                  <Text variant="caption" color="primaryText">
                     {domainOf(link)}
                   </Text>
                 </Pressable>

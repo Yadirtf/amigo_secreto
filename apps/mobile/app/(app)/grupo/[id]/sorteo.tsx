@@ -149,7 +149,7 @@ export default function DrawScreen() {
               flashStyle,
             ]}
           />
-          {reduced && !done ? <ActivityIndicator color={theme.color.primary} /> : null}
+          {reduced && !done ? <ActivityIndicator color={theme.color.primaryText} /> : null}
         </View>
         <View style={{ gap: theme.space.sm }} accessibilityLiveRegion="polite">
           <Text variant="title2" align="center" accessibilityRole="header">

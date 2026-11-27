@@ -11,7 +11,8 @@ const out = resolve(here, '../assets');
 mkdirSync(out, { recursive: true });
 
 const iconSvg = readFileSync(resolve(root, 'docs/ux/icon.svg'), 'utf8');
-const CREAM = '#FFF8F3';
+// Lavender mist behind the pastel bubbles (identidad-visual.md, paleta 1.1).
+const CREAM = '#F3EDFF';
 
 // Inner drawing of the mark (viewBox units of the 122x122 logo group).
 const MARK = iconSvg.slice(iconSvg.indexOf('<g '), iconSvg.lastIndexOf('</g>') + 4);

@@ -71,7 +71,7 @@ export const TextField = forwardRef<ComponentRef<typeof TextInput>, TextFieldPro
     const borderColor = hasError
       ? theme.color.danger
       : focused
-        ? theme.color.secondary
+        ? theme.color.focus
         : disabled
           ? theme.color.border
           : theme.color.borderStrong;
@@ -135,8 +135,8 @@ export const TextField = forwardRef<ComponentRef<typeof TextInput>, TextFieldPro
             accessibilityHint={helper}
             accessibilityState={{ disabled: !!disabled, busy: !!loading }}
             placeholderTextColor={theme.color.textSecondary}
-            selectionColor={theme.color.primary}
-            cursorColor={theme.color.primary}
+            selectionColor={theme.color.primaryText}
+            cursorColor={theme.color.primaryText}
             maxFontSizeMultiplier={typeStyle.maxFontSizeMultiplier}
             onFocus={(e) => {
               setFocused(true);

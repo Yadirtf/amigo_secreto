@@ -171,7 +171,7 @@ function ToastView({
   const dark = theme.scheme === 'dark';
   const bg = dark ? theme.color.surfaceAlt : theme.color.textPrimary;
   const fg = dark ? theme.color.textPrimary : theme.color.surface;
-  // Light toast action uses #FFC9C0 (9:1 on #2B1E1A), the dark textOnPrimarySoft token.
+  // Light toast action uses the dark textOnPrimarySoft token (#FFD0C6, >9:1 on textPrimary).
   const actionColor = dark ? theme.color.accent : tokens.color.dark.textOnPrimarySoft;
   const iconName: IconName | undefined =
     toast.icon ?? (toast.kind === 'error' ? 'error' : undefined);

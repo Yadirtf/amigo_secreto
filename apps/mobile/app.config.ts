@@ -13,9 +13,10 @@ function hostOf(url: string): string {
 }
 
 const BRAND = {
-  cream: '#FFF8F3',
-  cocoa: '#1A1412',
-  coral: '#C2453A',
+  cream: '#FFF7F2',
+  lavender: '#F3EDFF',
+  plum: '#18141F',
+  coral: '#FF7F6B',
 };
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -40,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       monochromeImage: './assets/adaptive-icon-monochrome.png',
-      backgroundColor: BRAND.cream,
+      backgroundColor: BRAND.lavender,
     },
     allowBackup: false,
     predictiveBackGestureEnabled: false,
@@ -62,6 +63,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
   },
   plugins: [
+    './plugins/withReleaseSigning',
     'expo-router',
     ['expo-secure-store', { faceIDPermission: false }],
     'expo-font',
@@ -73,7 +75,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         imageWidth: 120,
         resizeMode: 'contain',
         backgroundColor: BRAND.cream,
-        dark: { image: './assets/splash-icon.png', backgroundColor: BRAND.cocoa },
+        dark: { image: './assets/splash-icon.png', backgroundColor: BRAND.plum },
       },
     ],
     [

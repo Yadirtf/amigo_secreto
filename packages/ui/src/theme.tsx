@@ -79,12 +79,15 @@ export interface ThemeProviderProps {
   children: ReactNode;
   /** Forces a scheme (the "¿A quién te tocó?" screen is always dark). */
   scheme?: ColorScheme;
+  /** The user's choice in Perfil → Tema; "system" follows the phone. */
+  preference?: ColorScheme | 'system';
 }
 
-/** Follows the system theme (no in-app selector in v1). */
-export function ThemeProvider({ children, scheme }: ThemeProviderProps) {
+export function ThemeProvider({ children, scheme, preference = 'system' }: ThemeProviderProps) {
   const system = useColorScheme();
-  const resolved: ColorScheme = scheme ?? (system === 'dark' ? 'dark' : 'light');
+  const fromPreference: ColorScheme =
+    preference === 'system' ? (system === 'dark' ? 'dark' : 'light') : preference;
+  const resolved: ColorScheme = scheme ?? fromPreference;
   const theme = useMemo(() => (resolved === 'dark' ? darkTheme : lightTheme), [resolved]);
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
 }

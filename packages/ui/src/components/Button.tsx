@@ -43,21 +43,21 @@ function variantColors(theme: Theme, variant: ButtonVariant): VariantColors {
         bg: c.primary,
         bgPressed: c.primaryPressed,
         fg: 'textOnPrimary',
-        ripple: lightRipple,
+        ripple: darkRipple,
       };
     case 'secondary':
       return {
         bg: c.secondary,
         bgPressed: c.secondaryPressed,
         fg: 'textOnSecondary',
-        ripple: lightRipple,
+        ripple: darkRipple,
       };
     case 'accent':
       return { bg: c.accent, bgPressed: c.accentPressed, fg: 'textOnAccent', ripple: darkRipple };
     case 'destructive':
       return { bg: c.danger, bgPressed: c.dangerPressed, fg: 'textOnDanger', ripple: lightRipple };
     case 'ghost':
-      return { bg: 'transparent', bgPressed: c.primarySoft, fg: 'primary', ripple: darkRipple };
+      return { bg: 'transparent', bgPressed: c.primarySoft, fg: 'primaryText', ripple: darkRipple };
     case 'destructiveGhost':
       return { bg: 'transparent', bgPressed: c.dangerSoft, fg: 'danger', ripple: darkRipple };
     case 'outline':

@@ -1,0 +1,28 @@
+# Picks the app theme in Perfil → Tema (the app starts in light mode even
+# when the phone is dark). Usage: runFlow with env MODE (light | dark | system).
+appId: com.entrenos.amigosecreto
+---
+- tapOn:
+    id: profile-button
+- extendedWaitUntil:
+    visible:
+      id: profile-screen
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: profile-theme
+    direction: DOWN
+- tapOn:
+    id: profile-theme
+- extendedWaitUntil:
+    visible:
+      id: theme-sheet
+    timeout: 5000
+- takeScreenshot: shots/${THEME}-15-theme-sheet
+- tapOn:
+    id: theme-${MODE}
+- back
+- extendedWaitUntil:
+    visible:
+      id: groups-screen
+    timeout: 10000

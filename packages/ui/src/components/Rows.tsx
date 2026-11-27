@@ -137,7 +137,7 @@ export function SwitchRow({
         value={value}
         onValueChange={onValueChange}
         disabled={disabled}
-        trackColor={{ false: theme.color.borderStrong, true: theme.color.secondary }}
+        trackColor={{ false: theme.color.borderStrong, true: theme.color.focus }}
         thumbColor={theme.color.surface}
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
@@ -196,16 +196,21 @@ export function CheckRow({
           height: 24,
           borderRadius: radio ? 12 : 6,
           borderWidth: theme.size.borderWidthStrong,
-          borderColor: checked ? theme.color.primary : theme.color.borderStrong,
-          backgroundColor: checked && !radio ? theme.color.primary : 'transparent',
+          borderColor: checked ? theme.color.primaryText : theme.color.borderStrong,
+          backgroundColor: checked && !radio ? theme.color.primaryText : 'transparent',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        {checked && !radio ? <Icon name="check" size={16} color="textOnPrimary" /> : null}
+        {checked && !radio ? <Icon name="check" size={16} color="surface" /> : null}
         {checked && radio ? (
           <View
-            style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: theme.color.primary }}
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: 6,
+              backgroundColor: theme.color.primaryText,
+            }}
           />
         ) : null}
       </View>
