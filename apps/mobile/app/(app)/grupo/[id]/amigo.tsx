@@ -14,7 +14,7 @@ import {
 } from '@entre-nos/ui';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
 import { useChatMenu } from '../../../../src/components/ChatMenus';
 import { ChatView } from '../../../../src/components/ChatView';
 import { goBack, LoadError, LoadingScreen, OfflineBanner } from '../../../../src/components/states';
@@ -65,6 +65,19 @@ export default function FriendScreen() {
   );
 }
 
+function useKeyboardOpen(): boolean {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setOpen(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setOpen(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return open;
+}
+
 function FriendBody({
   a,
   g,
@@ -77,6 +90,10 @@ function FriendBody({
   const theme = useTheme();
   const [tab, setTab] = useState<Tab>(initialTab);
   const [shown, setShown] = useState(false);
+  const keyboardOpen = useKeyboardOpen();
+  // Small phones: with the keyboard up, the card would leave no room for the
+  // conversation, so it steps aside while typing.
+  const compact = keyboardOpen && tab === 'chat';
 
   // Name hidden by default every time; "Mostrar" reveals it for 10 s.
   useEffect(() => {
@@ -95,41 +112,43 @@ function FriendBody({
   return (
     <View style={[styles.flex, { gap: theme.space.md }]}>
       <OfflineBanner />
-      <Card testID="friend-card">
-        <View style={[styles.row, { gap: theme.space.md }]}>
-          {shown ? (
-            <Avatar name={r.name} seed={r.id} photo={r.photo} size="lg" />
-          ) : (
-            <AnonymousAvatar size="lg" />
-          )}
-          <View style={[styles.flex, { gap: theme.space.xs }]}>
-            <Text
-              variant="title3"
-              accessibilityLabel={shown ? r.name : 'Nombre oculto. Toca Mostrar para verlo'}
-              testID="friend-name"
-            >
-              {shown ? r.name : '••••••'}
-            </Text>
-            <View style={[styles.row, styles.wrap, { gap: theme.space.sm }]}>
-              {g ? <CountdownBadge daysLeft={g.daysLeft} /> : null}
-              {g?.budgetCop != null ? (
-                <Text variant="caption" color="textSecondary">
-                  {formatCop(g.budgetCop)}
-                </Text>
-              ) : null}
+      {compact ? null : (
+        <Card testID="friend-card">
+          <View style={[styles.row, { gap: theme.space.md }]}>
+            {shown ? (
+              <Avatar name={r.name} seed={r.id} photo={r.photo} size="lg" />
+            ) : (
+              <AnonymousAvatar size="lg" />
+            )}
+            <View style={[styles.flex, { gap: theme.space.xs }]}>
+              <Text
+                variant="title3"
+                accessibilityLabel={shown ? r.name : 'Nombre oculto. Toca Mostrar para verlo'}
+                testID="friend-name"
+              >
+                {shown ? r.name : '••••••'}
+              </Text>
+              <View style={[styles.row, styles.wrap, { gap: theme.space.sm }]}>
+                {g ? <CountdownBadge daysLeft={g.daysLeft} /> : null}
+                {g?.budgetCop != null ? (
+                  <Text variant="caption" color="textSecondary">
+                    {formatCop(g.budgetCop)}
+                  </Text>
+                ) : null}
+              </View>
             </View>
+            <Button
+              variant="ghost"
+              size="small"
+              icon={shown ? 'eyeOff' : 'eye'}
+              label={shown ? 'Ocultar' : 'Mostrar'}
+              accessibilityLabel={shown ? 'Ocultar el nombre' : 'Mostrar el nombre'}
+              onPress={() => setShown((s) => !s)}
+              testID="friend-show"
+            />
           </View>
-          <Button
-            variant="ghost"
-            size="small"
-            icon={shown ? 'eyeOff' : 'eye'}
-            label={shown ? 'Ocultar' : 'Mostrar'}
-            accessibilityLabel={shown ? 'Ocultar el nombre' : 'Mostrar el nombre'}
-            onPress={() => setShown((s) => !s)}
-            testID="friend-show"
-          />
-        </View>
-      </Card>
+        </Card>
+      )}
       <SegmentedControl<Tab>
         value={tab}
         onChange={setTab}
