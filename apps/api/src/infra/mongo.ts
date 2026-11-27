@@ -20,28 +20,26 @@ import type { AssignmentCipher } from './crypto.js';
  * domain (never raw request objects), and projections are explicit.
  */
 
-// ---------- connection (one client per isolate, ADR-0001) ----------
+// ---------- connection (one client per request, ADR-0013) ----------
 
-let cached: { uri: string; client: MongoClient; ready: Promise<MongoClient> } | null = null;
-
-export function getMongo(uri: string): Promise<MongoClient> {
-  if (cached && cached.uri === uri) return cached.ready;
-  const client = new MongoClient(uri, {
-    maxPoolSize: 3,
+/**
+ * Workers can't reuse a socket across requests (I/O belongs to the request
+ * that opened it), so each request gets its own client and closes it once the
+ * response and background work finish. The client connects lazily on the
+ * first operation: routes that never touch the database open no socket.
+ */
+export function newMongoClient(uri: string): MongoClient {
+  return new MongoClient(uri, {
+    maxPoolSize: 1,
     minPoolSize: 0,
     connectTimeoutMS: 5_000,
     serverSelectionTimeoutMS: 5_000,
     socketTimeoutMS: 10_000,
-    maxIdleTimeMS: 30_000,
+    // Polling avoids the extra streaming/RTT socket per server.
+    serverMonitoringMode: 'poll',
     retryWrites: true,
     appName: 'entre-nos-api',
   });
-  const ready = client.connect().catch((e: unknown) => {
-    cached = null;
-    throw e;
-  });
-  cached = { uri, client, ready };
-  return ready;
 }
 
 // ---------- documents ----------

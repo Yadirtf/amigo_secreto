@@ -9,11 +9,17 @@ export default {
   async scheduled(_controller, env, ctx) {
     ctx.waitUntil(
       (async () => {
-        const { deps } = await containerFromEnv(env);
-        const sent = await sendCountdowns(deps);
-        const revealed = await autoReveal(deps);
-        const purged = await purgeExpired(deps);
-        console.log(`cron countdowns=${sent} revealed=${revealed} purged=${purged}`);
+        const container = await containerFromEnv(env);
+        try {
+          const { deps } = container;
+          const sent = await sendCountdowns(deps);
+          const revealed = await autoReveal(deps);
+          const purged = await purgeExpired(deps);
+          console.log(`cron countdowns=${sent} revealed=${revealed} purged=${purged}`);
+          await container.background?.drain();
+        } finally {
+          await container.dispose?.();
+        }
       })(),
     );
   },

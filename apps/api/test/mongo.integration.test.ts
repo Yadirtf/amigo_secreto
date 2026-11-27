@@ -68,6 +68,7 @@ d('MongoDB adapters (integration)', () => {
         androidPackage: 'com.entrenos.amigosecreto',
         playStoreUrl: 'https://play.google.com',
         certFingerprints: [],
+        contactEmail: null,
       },
     };
     const app = createApp(() => container);

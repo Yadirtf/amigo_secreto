@@ -1,0 +1,10 @@
+# Maestro workspace. Needs a development/preview build pointing to staging
+# with EXPO_PUBLIC_DEV_LOGIN=1 (see eas.json). Run: maestro test .maestro
+flows:
+  - '*.yaml'
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - 01-create-group
+    - 03-join-errors
+    - 02-full-secret-santa

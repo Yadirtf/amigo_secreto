@@ -16,3 +16,4 @@ Formato: contexto → decisión → consecuencias. Una decisión por archivo, nu
 | 0010 | [Eliminación de cuenta](0010-eliminacion-cuenta.md) | Aceptada |
 | 0011 | [Identidad visual "Sobremesa"](0011-identidad-visual.md) | Aceptada |
 | 0012 | [Inicio de sesión de prueba (solo staging)](0012-login-de-prueba.md) | Aceptada |
+| 0013 | [Conexión a MongoDB: un cliente por petición](0013-conexion-mongo-por-peticion.md) | Aceptada |

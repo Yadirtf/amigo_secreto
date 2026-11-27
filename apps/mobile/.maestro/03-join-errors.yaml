@@ -1,0 +1,21 @@
+# S4: a mistyped code shows the inline error and keeps the button disabled.
+appId: com.entrenos.amigosecreto
+name: Unirse con código inválido
+tags:
+  - smoke
+---
+- runFlow:
+    file: subflows/dev-login.yaml
+    env:
+      NAME: Juan E2E
+- tapOn:
+    id: empty-join-code
+- tapOn:
+    id: join-code-input
+- inputText: ZZZZZZZZZZ
+- extendedWaitUntil:
+    visible: 'Ese código no existe.*'
+    timeout: 15000
+- assertVisible:
+    id: join-submit
+    enabled: false

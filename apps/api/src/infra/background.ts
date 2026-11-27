@@ -1,16 +1,19 @@
 /**
- * Work that must not delay the HTTP response (push delivery). Collected per
- * request and handed to `ctx.waitUntil` by the app middleware.
+ * Work that must not delay the HTTP response (push delivery). One queue per
+ * request: the app middleware hands it to `ctx.waitUntil` and only then
+ * closes that request's database connection.
  */
-let pending: Promise<unknown>[] = [];
+export class BackgroundQueue {
+  private pending: Promise<unknown>[] = [];
 
-export function runInBackground(task: Promise<unknown>): void {
-  pending.push(task.catch(() => undefined));
-}
+  run(task: Promise<unknown>): void {
+    this.pending.push(task.catch(() => undefined));
+  }
 
-export function drainBackground(): Promise<unknown> | null {
-  if (pending.length === 0) return null;
-  const all = Promise.all(pending);
-  pending = [];
-  return all;
+  drain(): Promise<unknown> | null {
+    if (this.pending.length === 0) return null;
+    const all = Promise.all(this.pending);
+    this.pending = [];
+    return all;
+  }
 }

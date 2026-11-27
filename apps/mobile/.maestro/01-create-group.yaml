@@ -1,0 +1,60 @@
+# S1 → S2 → S3 → S5: the organizer signs in and creates a group in < 30 s.
+appId: com.entrenos.amigosecreto
+name: Crear grupo
+tags:
+  - smoke
+---
+- runFlow:
+    file: subflows/dev-login.yaml
+    env:
+      NAME: Laura E2E
+# First run shows the empty state; later runs (same staging user) show the list.
+- tapOn:
+    id: empty-create-group
+    optional: true
+- tapOn:
+    id: create-group-button
+    optional: true
+- tapOn:
+    id: group-name-input
+- inputText: Oficina E2E
+- hideKeyboard
+# Small screens: the budget field can sit below the fold.
+- scrollUntilVisible:
+    element:
+      id: group-budget-input
+- tapOn:
+    id: group-budget-input
+- inputText: '50000'
+- hideKeyboard
+- tapOn:
+    id: group-form-submit
+- extendedWaitUntil:
+    visible:
+      id: invite-sheet
+    timeout: 15000
+- assertVisible: 'Invita a tu gente'
+- assertVisible:
+    id: invite-code
+- back
+- assertVisible:
+    id: group-screen
+- assertVisible: 'Oficina E2E'
+- assertVisible: '$ 50.000 por regalo'
+- assertVisible:
+    id: group-code
+# Fewer than 3 people: the draw button opens the invite sheet and a toast,
+# drawn inside the sheet's window, explains why.
+- scrollUntilVisible:
+    element:
+      id: group-draw
+- tapOn:
+    id: group-draw
+- extendedWaitUntil:
+    visible:
+      id: invite-sheet
+    timeout: 5000
+# The toast lasts 4 s; the slow CI emulator can miss it (the sheet is the proof).
+- assertVisible:
+    text: 'Necesitan al menos 3 personas.*'
+    optional: true

@@ -38,8 +38,9 @@ import type { GoogleVerifier, TokenService } from '../infra/auth.js';
 import type { PushTokenStore, RateLimiter } from '../infra/platform.js';
 import { HttpError, toErrorResponse } from './errors.js';
 import { landingPage, assetLinks } from './landing.js';
+import { privacyPage } from './privacy.js';
 import { openApiDocument } from './openapi.js';
-import { drainBackground } from '../infra/background.js';
+import type { BackgroundQueue } from '../infra/background.js';
 
 export interface AppConfig {
   appEnv: 'staging' | 'production' | 'test';
@@ -47,6 +48,8 @@ export interface AppConfig {
   androidPackage: string;
   playStoreUrl: string;
   certFingerprints: string[];
+  /** Public contact shown in the privacy policy; null hides it. */
+  contactEmail: string | null;
 }
 
 export interface Container {
@@ -56,6 +59,10 @@ export interface Container {
   pushTokens: PushTokenStore;
   rateLimiter: RateLimiter;
   config: AppConfig;
+  /** Per-request queue of work that runs after the response. */
+  background?: BackgroundQueue;
+  /** Releases per-request resources (the database connection). */
+  dispose?: () => Promise<void>;
 }
 
 type Env = { Variables: { container: Container; userId: string } };
@@ -144,15 +151,27 @@ export function createApp(getContainer: (c: Context) => Promise<Container> | Con
   });
 
   app.use('*', async (c, next) => {
-    c.set('container', await getContainer(c));
-    await next();
-    // Push notifications run after the response (PT-10).
-    const pending = drainBackground();
-    if (pending) {
-      try {
-        c.executionCtx.waitUntil(pending);
-      } catch {
-        await pending; // tests / runtimes without an execution context
+    const container = await getContainer(c);
+    c.set('container', container);
+    try {
+      await next();
+    } finally {
+      // Push notifications run after the response (PT-10); the connection is
+      // closed only once they are done.
+      const pending = container.background?.drain() ?? null;
+      const finish = async () => {
+        if (pending) await pending.catch(() => undefined);
+        await container.dispose?.().catch(() => undefined);
+      };
+      if (pending || container.dispose) {
+        let ctx: { waitUntil(p: Promise<unknown>): void } | undefined;
+        try {
+          ctx = c.executionCtx;
+        } catch {
+          // tests / runtimes without an execution context
+        }
+        if (ctx) ctx.waitUntil(finish());
+        else await finish();
       }
     }
   });
@@ -172,6 +191,16 @@ export function createApp(getContainer: (c: Context) => Promise<Container> | Con
       "default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'",
     );
     return c.html(landingPage(c.req.param('code'), config.playStoreUrl, config.androidPackage));
+  });
+
+  app.get('/privacidad', (c) => {
+    const { config } = c.get('container');
+    c.header('Cache-Control', 'public, max-age=3600');
+    c.header(
+      'Content-Security-Policy',
+      "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'",
+    );
+    return c.html(privacyPage(config.contactEmail));
   });
 
   const v1 = new Hono<Env>();

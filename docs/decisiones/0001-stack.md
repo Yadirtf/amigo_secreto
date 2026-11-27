@@ -14,4 +14,4 @@ La ficha proponía Firebase. El dueño del producto decidió reemplazarlo por Cl
 
 ## Consecuencias
 - El spike (workflow `spike-mongo.yml`) debe confirmar conexión, lectura/escritura y latencia antes de desplegar la API real.
-- Estrategia de conexión: un `MongoClient` por isolate reutilizado entre peticiones, `maxPoolSize` bajo (≤ 3), timeouts cortos (connect 5 s, serverSelection 5 s).
+- Estrategia de conexión: ~~un `MongoClient` por isolate reutilizado entre peticiones~~ **reemplazada por [ADR-0013](0013-conexion-mongo-por-peticion.md)**: un cliente por petición, `maxPoolSize` 1, timeouts cortos (connect 5 s, serverSelection 5 s).
