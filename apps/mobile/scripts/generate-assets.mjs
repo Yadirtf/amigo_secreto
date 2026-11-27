@@ -60,3 +60,44 @@ render(
   480,
   'splash-icon.png',
 );
+
+// 5. Google Play store graphics (docs/tienda/graficos): 512 icon and the
+//    1024×500 feature graphic, with the app fonts so text renders the same.
+const store = resolve(root, 'docs/tienda/graficos');
+mkdirSync(store, { recursive: true });
+const fontDir = resolve(root, 'node_modules/@expo-google-fonts');
+const fontFiles = [
+  resolve(fontDir, 'fredoka/600SemiBold/Fredoka_600SemiBold.ttf'),
+  resolve(fontDir, 'nunito/700Bold/Nunito_700Bold.ttf'),
+];
+function renderStore(svg, width, file) {
+  const png = new Resvg(svg, {
+    fitTo: { mode: 'width', value: width },
+    font: { fontFiles, loadSystemFonts: false, defaultFontFamily: 'Fredoka' },
+  })
+    .render()
+    .asPng();
+  writeFileSync(resolve(store, file), png);
+  console.log(`docs/tienda/graficos/${file} (${png.length} bytes)`);
+}
+renderStore(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><rect width="1024" height="1024" fill="${CREAM}"/>${MARK.replace(/transform="[^"]*"/, 'transform="translate(36 36) scale(7.8)"')}</svg>`,
+  512,
+  'icono-512.png',
+);
+renderStore(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 500" width="1024" height="500">
+    <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE3DC"/><stop offset="0.55" stop-color="#F3EDFF"/><stop offset="1" stop-color="#DDF5EC"/>
+    </linearGradient></defs>
+    <rect width="1024" height="500" fill="url(#bg)"/>
+    <circle cx="930" cy="70" r="46" fill="#FFD166" opacity="0.55"/>
+    <circle cx="80" cy="440" r="60" fill="#FF7F6B" opacity="0.25"/>
+    ${MARK.replace(/transform="[^"]*"/, 'transform="translate(40 105) scale(2.6)"')}
+    <text x="400" y="225" font-family="Fredoka" font-weight="600" font-size="64" fill="#2A1F2D">Entre Nos</text>
+    <text x="400" y="290" font-family="Nunito" font-weight="700" font-size="34" fill="#665A6B">Tu amigo secreto,</text>
+    <text x="400" y="335" font-family="Nunito" font-weight="700" font-size="34" fill="#665A6B">sin papelitos ni enredos</text>
+  </svg>`,
+  1024,
+  'grafico-funciones-1024x500.png',
+);

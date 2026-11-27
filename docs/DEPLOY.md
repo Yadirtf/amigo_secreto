@@ -51,6 +51,10 @@ Todo corre en capas gratuitas. El despliegue de la API lo hace GitHub Actions; t
 En `apps/api/wrangler.toml` pon en `ANDROID_CERT_FINGERPRINTS` las huellas **SHA-256** de los certificados (EAS y Play App Signing), separadas por coma, y despliega. La API sirve `/.well-known/assetlinks.json`.
 
 ## 7. Builds de Android
+### Con GitHub Actions (recomendado, gratis)
+- **APK de prueba (staging):** sale solo en cada despliegue de staging (*Deploy API* → artifact `entre-nos-staging-apk`).
+- **AAB para Play:** *Actions → Release Android → Run workflow*. Necesita la llave de subida en los secretos `ANDROID_UPLOAD_*`. Guía completa en [tienda/publicar-en-play-store.md](tienda/publicar-en-play-store.md).
+
 ### Con EAS (nube, gratis con límites)
 ```bash
 npm i -g eas-cli
