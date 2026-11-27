@@ -1,0 +1,17 @@
+{
+  "name": "@entre-nos/spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "mongodb": "^7.9.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261127.1",
+    "@types/node": "^22.20.7",
+    "wrangler": "^4.168.0"
+  }
+}

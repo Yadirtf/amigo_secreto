@@ -1,0 +1,71 @@
+name: Spike - MongoDB on Workers
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/**']
+    paths: ['apps/spike/**', '.github/workflows/spike-mongo.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spike-mongo
+  cancel-in-progress: true
+
+jobs:
+  spike:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI_STAGING }}
+    steps:
+      - name: Check secrets
+        id: check
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$MONGODB_URI" ]; then
+            echo "::notice::Spike skipped: add CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and MONGODB_URI_STAGING secrets."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.run == 'true'
+      - uses: pnpm/action-setup@v4
+        if: steps.check.outputs.run == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.run == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: steps.check.outputs.run == 'true'
+      - name: Deploy spike worker
+        if: steps.check.outputs.run == 'true'
+        working-directory: apps/spike
+        run: |
+          SPIKE_KEY=$(openssl rand -hex 24)
+          echo "::add-mask::$SPIKE_KEY"
+          echo "SPIKE_KEY=$SPIKE_KEY" >> "$GITHUB_ENV"
+          npx wrangler deploy 2>&1 | tee deploy.log
+          printf '%s' "$MONGODB_URI" | npx wrangler secret put MONGODB_URI
+          printf '%s' "$SPIKE_KEY" | npx wrangler secret put SPIKE_KEY
+          URL=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "SPIKE_URL=$URL" >> "$GITHUB_ENV"
+      - name: Measure (20 sequential requests)
+        if: steps.check.outputs.run == 'true'
+        run: |
+          sleep 5
+          echo "| # | ok | reused | connect | insert | find | delete | total | colo |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|---|---|---|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          for i in $(seq 1 20); do
+            R=$(curl -s -H "x-spike-key: $SPIKE_KEY" "$SPIKE_URL")
+            echo "$R"
+            echo "$R" | jq -r --arg i "$i" '"| \($i) | \(.ok) | \(.reusedClient) | \(.ms.connect) | \(.ms.insert) | \(.ms.find) | \(.ms.delete) | \(.ms.total) | \(.colo) | \(.error // "")"' >> "$GITHUB_STEP_SUMMARY"
+          done
+      - name: Remove spike worker
+        if: always() && steps.check.outputs.run == 'true'
+        working-directory: apps/spike
+        run: npx wrangler delete --force || true

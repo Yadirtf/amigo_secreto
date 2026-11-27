@@ -1,0 +1,2 @@
+# False positive: unsigned "alg: none" JWT fixture used to test that forged tokens are rejected.
+1db855e9a89ef5e5d190784ddeca055680139dce:apps/api/test/api.test.ts:generic-api-key:46
