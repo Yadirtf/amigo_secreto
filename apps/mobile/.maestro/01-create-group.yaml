@@ -18,6 +18,11 @@ tags:
 - tapOn:
     id: group-name-input
 - inputText: Oficina E2E
+- hideKeyboard
+# Small screens: the budget field can sit below the fold.
+- scrollUntilVisible:
+    element:
+      id: group-budget-input
 - tapOn:
     id: group-budget-input
 - inputText: '50000'

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { POLICY_MARKDOWN } from '../src/http/privacy.js';
+import { BackgroundQueue } from '../src/infra/background.js';
 import { harness } from './harness.js';
 
 const futureDay = () => {
@@ -398,6 +399,36 @@ describe('public pages', () => {
       'utf8',
     );
     expect(POLICY_MARKDOWN).toBe(doc);
+  });
+  it('closes the per-request connection only after background work', async () => {
+    const h = harness();
+    const order: string[] = [];
+    h.container.background = new BackgroundQueue();
+    h.container.dispose = async () => {
+      order.push('dispose');
+    };
+    const bg = h.container.background;
+    h.container.deps.notifications = {
+      async notify() {
+        bg.run(new Promise((r) => setTimeout(r, 20)).then(() => order.push('push')));
+      },
+    };
+    const org = await h.login('org-bg', 'Org');
+    order.length = 0;
+    const g = await h.call('POST', '/v1/groups', {
+      token: org.accessToken,
+      body: { name: 'Fondo', deliveryDate: futureDay(), budgetCop: 50_000 },
+    });
+    const code = g.json.inviteCode as string;
+    const m = await h.login('member-bg', 'Ana');
+    order.length = 0;
+    const j = await h.call('POST', '/v1/groups/join', { token: m.accessToken, body: { code } });
+    expect(j.status, j.text).toBe(200);
+    expect(order).toEqual(['push', 'dispose']);
+    // A failing handler still releases the connection.
+    order.length = 0;
+    expect((await h.call('GET', '/v1/groups/nope', { token: m.accessToken })).status).toBe(404);
+    expect(order).toEqual(['dispose']);
   });
   it('serves assetlinks, health and openapi', async () => {
     const h = harness();

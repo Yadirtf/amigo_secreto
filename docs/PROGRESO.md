@@ -23,7 +23,7 @@
 - Material de tiendas en `docs/tienda/` (ficha de Play, seguridad de datos, clasificación de contenido) y política de privacidad publicada por la API en `/privacidad`.
 
 ## En curso
-- Primera corrida de los e2e en CI y revisión UX pantalla por pantalla.
+- e2e en CI: el APK compila y corre en el emulador. La primera corrida destapó que Workers no reutiliza conexiones entre peticiones; corregido con un cliente por petición (ADR-0013). Luego, revisión UX pantalla por pantalla.
 
 ## Falta
 - Pruebas de red lenta / sin conexión y medición de consumo de datos.

@@ -4,7 +4,7 @@ import { JoseGoogleVerifier, TokenService } from './infra/auth.js';
 import { AssignmentCipher, cryptoIds, cryptoRandom } from './infra/crypto.js';
 import {
   collections,
-  getMongo,
+  newMongoClient,
   MongoAssignments,
   MongoGroups,
   MongoMessages,
@@ -14,6 +14,7 @@ import {
 } from './infra/mongo.js';
 import { MongoPushTokens, MongoRateLimiter, MongoSessions } from './infra/platform.js';
 import { ExpoPushService } from './infra/push.js';
+import { BackgroundQueue } from './infra/background.js';
 
 export interface WorkerEnv {
   APP_ENV: 'staging' | 'production';
@@ -39,53 +40,61 @@ const split = (s: string | undefined) =>
     .map((x) => x.trim())
     .filter(Boolean);
 
-let cache: { key: string; container: Promise<Container> } | null = null;
+let cipherCache: { key: string; cipher: Promise<AssignmentCipher> } | null = null;
 
-/** Builds (once per isolate) the dependency graph from Worker bindings. */
-export function containerFromEnv(env: WorkerEnv): Promise<Container> {
-  const key = `${env.APP_ENV}|${env.MONGODB_URI.length}|${env.JWT_SECRET.length}`;
-  if (cache?.key === key) return cache.container;
-  const container = (async () => {
-    const client = await getMongo(env.MONGODB_URI);
-    const c = collections(client.db());
-    const cipher = await AssignmentCipher.fromSecret(env.ASSIGNMENT_KEY);
-    const pushTokens = new MongoPushTokens(c);
-    const maxFree = env.MAX_MEMBERS_FREE ? Number(env.MAX_MEMBERS_FREE) : null;
-    const config: AppConfig = {
-      appEnv: env.APP_ENV,
-      devLoginKey: env.APP_ENV === 'production' ? null : (env.DEV_LOGIN_KEY ?? null),
-      androidPackage: env.ANDROID_PACKAGE,
-      playStoreUrl: env.PLAY_STORE_URL,
-      certFingerprints: split(env.ANDROID_CERT_FINGERPRINTS),
-      contactEmail: env.CONTACT_EMAIL?.trim() || null,
-    };
-    return {
-      deps: {
-        clock: systemClock,
-        random: cryptoRandom,
-        ids: cryptoIds,
-        users: new MongoUsers(c),
-        groups: new MongoGroups(c),
-        assignments: new MongoAssignments(c, cipher),
-        messages: new MongoMessages(c),
-        wishlists: new MongoWishlists(c),
-        reports: new MongoReports(c),
-        notifications: new ExpoPushService(pushTokens, env.EXPO_ACCESS_TOKEN),
-        policy: {
-          ...defaultPolicy,
-          maxMembersFree: maxFree && Number.isInteger(maxFree) && maxFree > 0 ? maxFree : null,
-        },
-      },
-      tokens: new TokenService(env.JWT_SECRET, new MongoSessions(c)),
-      google: new JoseGoogleVerifier(split(env.GOOGLE_CLIENT_IDS)),
-      pushTokens,
-      rateLimiter: new MongoRateLimiter(c),
-      config,
-    } satisfies Container;
-  })();
-  container.catch(() => {
-    cache = null;
+/** Keys are pure crypto objects and can be shared by requests in an isolate. */
+function cipherFor(secret: string): Promise<AssignmentCipher> {
+  if (cipherCache?.key === secret) return cipherCache.cipher;
+  const cipher = AssignmentCipher.fromSecret(secret);
+  cipher.catch(() => {
+    cipherCache = null;
   });
-  cache = { key, container };
-  return container;
+  cipherCache = { key: secret, cipher };
+  return cipher;
+}
+
+/**
+ * Builds the dependency graph for ONE request (or cron run). Call `dispose`
+ * when the work, including background push, is done.
+ */
+export async function containerFromEnv(env: WorkerEnv): Promise<Container> {
+  const client = newMongoClient(env.MONGODB_URI);
+  const background = new BackgroundQueue();
+  const c = collections(client.db());
+  const cipher = await cipherFor(env.ASSIGNMENT_KEY);
+  const pushTokens = new MongoPushTokens(c);
+  const maxFree = env.MAX_MEMBERS_FREE ? Number(env.MAX_MEMBERS_FREE) : null;
+  const config: AppConfig = {
+    appEnv: env.APP_ENV,
+    devLoginKey: env.APP_ENV === 'production' ? null : (env.DEV_LOGIN_KEY ?? null),
+    androidPackage: env.ANDROID_PACKAGE,
+    playStoreUrl: env.PLAY_STORE_URL,
+    certFingerprints: split(env.ANDROID_CERT_FINGERPRINTS),
+    contactEmail: env.CONTACT_EMAIL?.trim() || null,
+  };
+  return {
+    deps: {
+      clock: systemClock,
+      random: cryptoRandom,
+      ids: cryptoIds,
+      users: new MongoUsers(c),
+      groups: new MongoGroups(c),
+      assignments: new MongoAssignments(c, cipher),
+      messages: new MongoMessages(c),
+      wishlists: new MongoWishlists(c),
+      reports: new MongoReports(c),
+      notifications: new ExpoPushService(pushTokens, env.EXPO_ACCESS_TOKEN, background),
+      policy: {
+        ...defaultPolicy,
+        maxMembersFree: maxFree && Number.isInteger(maxFree) && maxFree > 0 ? maxFree : null,
+      },
+    },
+    tokens: new TokenService(env.JWT_SECRET, new MongoSessions(c)),
+    google: new JoseGoogleVerifier(split(env.GOOGLE_CLIENT_IDS)),
+    pushTokens,
+    rateLimiter: new MongoRateLimiter(c),
+    config,
+    background,
+    dispose: () => client.close(),
+  } satisfies Container;
 }

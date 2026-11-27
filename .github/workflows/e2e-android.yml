@@ -59,8 +59,13 @@ jobs:
           nohup npx wrangler dev --ip 0.0.0.0 --port 8787 > ../../wrangler.log 2>&1 &
           for i in $(seq 1 60); do curl -fs http://127.0.0.1:8787/health && break; sleep 2; done
           # Local spike: driver connects from workerd to MongoDB.
-          curl -s -X POST http://127.0.0.1:8787/v1/auth/dev -H 'content-type: application/json' \
-            -d "{\"key\":\"$DEV_LOGIN_KEY\",\"name\":\"Probe\"}" | head -c 200; echo
+          # Several requests: each one must open its own connection (ADR-0013).
+          for n in 1 2 3; do
+            curl -s -X POST http://127.0.0.1:8787/v1/auth/dev -H 'content-type: application/json' \
+              -d "{\"key\":\"$DEV_LOGIN_KEY\",\"name\":\"Probe $n\"}" | grep -q accessToken \
+              || { echo "dev login $n failed"; tail -50 ../../wrangler.log; exit 1; }
+          done
+          echo "API ok against MongoDB from workerd"
 
       - name: Build release APK (e2e)
         working-directory: apps/mobile
@@ -99,7 +104,7 @@ jobs:
           disable-animations: true
           script: |
             adb install -r apps/mobile/android/app/build/outputs/apk/release/app-release.apk
-            maestro test apps/mobile/.maestro --format junit --output maestro-report.xml --debug-output maestro-debug
+            maestro test apps/mobile/.maestro --format junit --output maestro-report.xml --debug-output maestro-debug || { echo '--- wrangler.log (tail) ---'; grep -vE '^\s*$' wrangler.log | tail -60; exit 1; }
 
       - name: Upload reports
         if: always()

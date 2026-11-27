@@ -1,5 +1,5 @@
 import type { NotificationEvent, NotificationService, UserId } from '@entre-nos/domain';
-import { runInBackground } from './background.js';
+import type { BackgroundQueue } from './background.js';
 import type { PushTokenStore } from './platform.js';
 
 /**
@@ -101,11 +101,12 @@ export class ExpoPushService implements NotificationService {
   constructor(
     private readonly tokens: PushTokenStore,
     private readonly accessToken: string | undefined,
+    private readonly background: BackgroundQueue,
     private readonly fetchImpl: typeof fetch = fetch,
   ) {}
 
   async notify(userIds: readonly UserId[], event: NotificationEvent): Promise<void> {
-    runInBackground(this.deliver(userIds, event));
+    this.background.run(this.deliver(userIds, event));
   }
 
   private async deliver(userIds: readonly UserId[], event: NotificationEvent): Promise<void> {
