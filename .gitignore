@@ -18,3 +18,4 @@ ios/
 *.mobileprovision
 google-services.json
 GoogleService-Info.plist
+.claude/
