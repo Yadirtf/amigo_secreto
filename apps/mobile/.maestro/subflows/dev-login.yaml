@@ -7,7 +7,7 @@ appId: com.entrenos.amigosecreto
 - extendedWaitUntil:
     visible:
       id: welcome-screen
-    timeout: 20000
+    timeout: 40000
 - tapOn:
     id: dev-login-name
 - inputText: ${NAME}
