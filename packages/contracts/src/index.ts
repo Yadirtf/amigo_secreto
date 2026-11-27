@@ -66,6 +66,15 @@ export type ApiError = z.infer<typeof ApiError>;
 export const GoogleSignInRequest = z.strictObject({
   idToken: z.string().min(20).max(4096),
 });
+/** Staging/e2e only (disabled in production). */
+export const DevSignInRequest = z.strictObject({
+  key: z.string().min(16).max(200),
+  name: z
+    .string()
+    .min(1)
+    .max(40)
+    .regex(/^[\p{L}\p{N} ._-]+$/u),
+});
 export const RefreshRequest = z.strictObject({
   refreshToken: z.string().min(20).max(200),
 });

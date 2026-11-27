@@ -15,3 +15,4 @@ Formato: contexto → decisión → consecuencias. Una decisión por archivo, nu
 | 0009 | [Fotos, retención y límites gratuitos](0009-datos-y-limites.md) | Aceptada |
 | 0010 | [Eliminación de cuenta](0010-eliminacion-cuenta.md) | Aceptada |
 | 0011 | [Identidad visual "Sobremesa"](0011-identidad-visual.md) | Aceptada |
+| 0012 | [Inicio de sesión de prueba (solo staging)](0012-login-de-prueba.md) | Aceptada |

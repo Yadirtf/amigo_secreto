@@ -1,0 +1,27 @@
+{
+  "name": "@entre-nos/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run",
+    "openapi": "tsx scripts/openapi.ts"
+  },
+  "dependencies": {
+    "@entre-nos/contracts": "workspace:*",
+    "@entre-nos/domain": "workspace:*",
+    "hono": "^4.13.23",
+    "jose": "^6.2.18",
+    "mongodb": "^7.9.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261127.1",
+    "@types/node": "^22",
+    "vitest": "^5.1.2",
+    "wrangler": "^4.168.0"
+  }
+}

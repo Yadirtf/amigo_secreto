@@ -17,6 +17,15 @@ jobs:
     name: Lint, types, tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      mongo:
+        image: mongo:8
+        ports: ['27017:27017']
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      MONGODB_TEST_URI: mongodb://localhost:27017
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -28,8 +37,11 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
-      - name: Tests (domain coverage >= 90% enforced)
+      - name: Tests (domain coverage >= 90%, API integration with MongoDB)
         run: pnpm test:coverage
+      - name: Worker bundle builds
+        working-directory: apps/api
+        run: npx wrangler deploy --dry-run --outdir dist
       - name: Coverage summary
         if: always()
         run: |

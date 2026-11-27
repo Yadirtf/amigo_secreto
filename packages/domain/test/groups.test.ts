@@ -228,7 +228,7 @@ describe('organizer actions', () => {
     await expect(setExclusions(deps, org, groupId, [[a, 'ghost']])).rejects.toMatchObject({
       code: 'INVALID_INPUT',
     });
-    const many = Array.from({ length: 201 }, () => [a, b] as const);
+    const many = Array.from({ length: 201 }, (): [string, string] => [a, b]);
     await expect(setExclusions(deps, org, groupId, many)).rejects.toMatchObject({
       code: 'INVALID_INPUT',
     });

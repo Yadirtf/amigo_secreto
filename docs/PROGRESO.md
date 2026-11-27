@@ -12,9 +12,12 @@
 - CI: lint, tipos, tests con cobertura, `pnpm audit`, gitleaks, CodeQL, Dependabot.
 - Workflow del spike MongoDB-en-Workers (`spike-mongo.yml`).
 
+- Identidad visual "Sobremesa", guía de estilo, tokens, flujos y checklist de fricción (`docs/ux/`).
+- API Hono sobre Workers: todos los endpoints de `docs/API.md`, Google Sign-In, JWT de 15 min con refresh rotativo, rate limiting en MongoDB, asignaciones cifradas en reposo, landing de invitación, App Links, OpenAPI en `/v1/openapi.json`, cron diario (cuenta regresiva, revelación automática, purga). 20 tests de API (incluye IDOR en cada endpoint) + tests de integración con MongoDB real en CI.
+- Workflow de despliegue (`deploy-api.yml`) y guía `docs/DEPLOY.md`.
+
 ## En curso
-- Identidad visual y flujos (UX).
-- API Hono + adaptadores MongoDB + autenticación con Google.
+- App móvil Expo (pantallas v1, sistema de diseño).
 
 ## Falta
 - App móvil, push, deep links, caché offline.

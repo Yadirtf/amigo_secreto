@@ -36,7 +36,7 @@ export function cloneGroup(g: Group): Group {
     revealedAt: g.revealedAt ? new Date(g.revealedAt) : null,
     createdAt: new Date(g.createdAt),
     members: g.members.map((m) => ({ ...m, joinedAt: new Date(m.joinedAt) })),
-    exclusions: g.exclusions.map(([a, b]) => [a, b] as const),
+    exclusions: g.exclusions.map(([a, b]) => [a, b]),
   };
 }
 
