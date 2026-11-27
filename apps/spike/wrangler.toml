@@ -1,0 +1,6 @@
+# Spike: proves the official MongoDB driver works on Workers (ADR-0001).
+name = "entre-nos-spike"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
