@@ -17,5 +17,5 @@ appId: com.entrenos.amigosecreto
     id: profile-logout
 - extendedWaitUntil:
     visible:
-      id: welcome-screen
+      id: dev-login-name
     timeout: 30000

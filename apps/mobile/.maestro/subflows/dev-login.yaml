@@ -6,7 +6,7 @@ appId: com.entrenos.amigosecreto
     clearState: true
 - extendedWaitUntil:
     visible:
-      id: welcome-screen
+      id: dev-login-name
     timeout: 40000
 - tapOn:
     id: dev-login-name
