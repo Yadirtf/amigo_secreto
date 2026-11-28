@@ -4,13 +4,10 @@ appId: com.entrenos.amigosecreto
 ---
 - launchApp:
     clearState: true
-# A cold start after clearState can sit on the splash for 40-60 s on the
-# software-rendered CI emulator (seen twice on 2026-11-27, screen still on
-# the splash at 40 s, welcome shown seconds later).
 - extendedWaitUntil:
     visible:
       id: dev-login-name
-    timeout: 90000
+    timeout: 40000
 - takeScreenshot: shots/${THEME}-00-welcome
 - tapOn:
     id: dev-login-name

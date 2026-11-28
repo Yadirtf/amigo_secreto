@@ -4,7 +4,6 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
-import { Appearance } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -21,30 +20,23 @@ interface AppearanceState {
   setMode: (mode: AppearanceMode) => void;
 }
 
-/** Native views (keyboard, dialogs, date picker) follow the same choice. */
-export function applyNativeAppearance(mode: AppearanceMode): void {
-  try {
-    Appearance.setColorScheme(mode === 'system' ? 'unspecified' : mode);
-  } catch {
-    // Older runtimes: the app theme still follows the choice.
-  }
-}
+// The choice only drives our ThemeProvider. We deliberately do not call
+// Appearance.setColorScheme: on Android it changes the night mode, which
+// recreates the activity, and a recreate during startup brought the native
+// splash back after it was hidden (app stuck on the splash, seen in e2e).
+// Native pieces (keyboard, system dialogs) keep following the phone.
 
 export const useAppearance = create<AppearanceState>()(
   persist(
     (set) => ({
       // The app opens in light mode until the user picks something else.
       mode: 'light',
-      setMode: (mode) => {
-        applyNativeAppearance(mode);
-        set({ mode });
-      },
+      setMode: (mode) => set({ mode }),
     }),
     {
       name: 'entrenos.appearance.v1',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (s) => ({ mode: s.mode }),
-      onRehydrateStorage: () => (state) => applyNativeAppearance(state?.mode ?? 'light'),
     },
   ),
 );
