@@ -63,14 +63,7 @@ export default function RootLayout() {
     (fontsLoaded || !!fontError) && status !== 'loading' && secureRestored && appearanceReady;
 
   useEffect(() => {
-    if (!ready) return;
-    const hide = () => void SplashScreen.hideAsync().catch(() => undefined);
-    hide();
-    // On a slow cold start the first hide can land before the native splash
-    // is attached and is lost, leaving the splash over a ready app (seen in
-    // e2e). Hiding is idempotent, so try again once the first frames are up.
-    const retries = [500, 2000].map((ms) => setTimeout(hide, ms));
-    return () => retries.forEach(clearTimeout);
+    if (ready) void SplashScreen.hideAsync().catch(() => undefined);
   }, [ready]);
 
   if (!ready) return null;

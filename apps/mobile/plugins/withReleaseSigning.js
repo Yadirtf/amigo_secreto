@@ -2,7 +2,7 @@
 // ANDROID_UPLOAD_* variables are set (release workflow, see docs/DEPLOY.md).
 // Without them, release builds keep the template's debug key (staging APK,
 // e2e), so nothing changes for those builds.
-/* global require, module */
+/* global require, module, process */
 // Config plugins are loaded by Node as CommonJS.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { withAppBuildGradle } = require('expo/config-plugins');
@@ -36,6 +36,9 @@ if (uploadStore) {
 
 module.exports = function withReleaseSigning(config) {
   return withAppBuildGradle(config, (cfg) => {
+    // Only the release workflow sets the upload key (before prebuild); every
+    // other build keeps the template's build.gradle untouched.
+    if (!process.env.ANDROID_UPLOAD_STORE_FILE) return cfg;
     const src = cfg.modResults.contents;
     if (src.includes(MARK)) return cfg;
     cfg.modResults.contents = `${src.trimEnd()}\n${SIGNING}`;
